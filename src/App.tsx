@@ -1,21 +1,19 @@
 import "./App.css";
+import ProductGrid from "./components/ProductGrid";
+import { products } from "./data/products";
 
 function App() {
-  function handleClick() {
-    console.log("Hello from React! Button was clicked.");
-  }
-
   return (
     <main>
-      <h1>My First React App</h1>
+      <section className="featured-products">
+        <div className="section-heading">
+          <h1>Featured Products</h1>
 
-      <p>
-        I am learning React with Vite and TypeScript.
-      </p>
+          <p>Top picks just for you</p>
+        </div>
 
-      <button onClick={handleClick}>
-        Click Me
-      </button>
+        <ProductGrid products={products} />
+      </section>
     </main>
   );
 }
