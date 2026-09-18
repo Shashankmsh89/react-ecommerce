@@ -84,11 +84,12 @@ main {
 ========================= */
 
 .product-card {
-  background: #ffffff;
+  display: grid;
+  grid-template-rows: auto 1fr;
 
+  background: #ffffff;
   border: 1px solid #dddddd;
   border-radius: 3px;
-
   overflow: hidden;
 
   transition:
@@ -141,7 +142,13 @@ main {
 ========================= */
 
 .product-info {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
   padding: 12px 14px 14px;
+
   text-align: center;
 }
 
@@ -156,16 +163,19 @@ main {
   text-transform: uppercase;
 
   line-height: 1.25;
+
+  overflow-wrap: anywhere;
 }
 
 .product-code {
+  height: 24px;
+
   margin: 0 0 8px;
 
   color: #555555;
 
   font-size: 0.72rem;
   font-weight: 600;
-  text-align: center;
 }
 
 /* =========================
@@ -173,12 +183,15 @@ main {
 ========================= */
 
 .product-rating {
+  height: 26px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   gap: 5px;
 
-  margin: 0 0 14px;
+  margin: 0 0 20px;
 
   font-size: 0.8rem;
 }
@@ -206,8 +219,9 @@ main {
 ========================= */
 
 .product-quantity {
-  display: flex;
+  height: 34px;
 
+  display: flex;
   align-items: center;
   justify-content: center;
 
@@ -243,6 +257,8 @@ main {
 .add-to-cart {
   width: 100%;
 
+  margin-top: auto;
+
   padding: 11px 8px;
 
   border: none;
@@ -254,6 +270,7 @@ main {
   font-weight: 800;
 
   cursor: pointer;
+
 
   transition: background 0.2s ease;
 }
@@ -268,9 +285,9 @@ main {
 
 .shopping-list {
   width: 100%;
+  height: 30px;
 
   margin-top: 9px;
-
   padding: 0;
 
   border: none;
