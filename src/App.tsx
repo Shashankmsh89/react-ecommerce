@@ -1,7 +1,7 @@
-import ComponentShowcase from "./pages/ComponentShowcase";
+import QuantitySelector from "./pages/QuantitySelector";
 
 function App() {
-  return <ComponentShowcase />;
+  return <QuantitySelector />;
 }
 
 export default App;
