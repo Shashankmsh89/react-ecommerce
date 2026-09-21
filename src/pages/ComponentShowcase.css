@@ -1,0 +1,195 @@
+/* =========================
+   PAGE
+========================= */
+
+.showcase {
+    width: min(1200px, 100%);
+
+    margin: 0 auto;
+
+    padding: 48px 40px 60px;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    color: #171717;
+}
+
+.showcase>h1 {
+    margin: 0 0 32px;
+
+    text-align: center;
+
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+
+/* =========================
+   SECTION
+========================= */
+
+.showcase-section {
+    margin-bottom: 42px;
+}
+
+.showcase-section h2 {
+    margin: 0 0 24px;
+
+    padding: 12px 18px;
+
+    background: #3f3f46;
+
+    color: #ffffff;
+
+    font-size: 1rem;
+    font-weight: 800;
+
+    letter-spacing: 0.5px;
+}
+
+
+/* =========================
+   BUTTON SHOWCASE
+========================= */
+
+.button-showcase {
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 28px;
+
+    padding: 20px 30px;
+}
+
+.variant-item {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+.variant-item .button {
+    width: 100%;
+}
+
+.variant-item span,
+.card-variant>span {
+    color: #333333;
+
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+
+/* =========================
+   CARD SHOWCASE
+========================= */
+
+.card-showcase {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 40px;
+
+    padding: 20px 30px;
+}
+
+.card-variant {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+.card-variant .card {
+    width: 100%;
+
+    min-height: 220px;
+
+    display: flex;
+
+    flex-direction: column;
+}
+
+.card-variant .card h3 {
+    margin: 0 0 12px;
+
+    color: #172033;
+
+    font-size: 1.4rem;
+}
+
+.card-variant .card p {
+    margin: 0 0 28px;
+
+    color: #333333;
+
+    font-size: 1rem;
+}
+
+.card-variant .card .button {
+    margin-top: auto;
+}
+
+
+/* =========================
+   FOOTER MESSAGE
+========================= */
+
+.showcase-footer {
+    margin: 20px 0 0;
+
+    text-align: center;
+
+    color: #333333;
+
+    font-size: 0.95rem;
+}
+
+
+/* =========================
+   TABLET
+========================= */
+
+@media (max-width: 850px) {
+    .button-showcase {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .card-showcase {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 520px) {
+    .showcase {
+        padding: 32px 16px 40px;
+    }
+
+    .showcase>h1 {
+        font-size: 1.6rem;
+    }
+
+    .button-showcase {
+        grid-template-columns: 1fr;
+
+        padding: 15px;
+    }
+
+    .card-showcase {
+        padding: 15px;
+    }
+}
