@@ -1,83 +1,158 @@
+import { useState } from "react";
+import Button from "./Button";
+
 interface ProductCardProps {
-    id: number;
     name: string;
     imageUrl: string;
-    category?: string;
     rating?: number;
     reviewCount?: number;
     productCode?: string;
+    price?: number;
+    unitPrice?: number;
+    variant?: "featured" | "listing";
 }
 
-function ProductCard(props: ProductCardProps) {
+function ProductCard({
+    name,
+    imageUrl,
+    rating,
+    reviewCount,
+    productCode,
+    price,
+    unitPrice,
+    variant = "featured",
+}: ProductCardProps) {
+    const [quantity, setQuantity] = useState(1);
+
+    const totalPrice =
+        price !== undefined ? price * quantity : undefined;
+
+    function increaseQuantity() {
+        setQuantity(
+            (currentQuantity) => currentQuantity + 1
+        );
+    }
+
+    function decreaseQuantity() {
+        setQuantity((currentQuantity) =>
+            Math.max(1, currentQuantity - 1)
+        );
+    }
+
     function handleAddToCart() {
         console.log(
-            `Added to cart: ${props.name} (ID: ${props.id})`
+            `Added to cart: ${name} | Quantity: ${quantity} | Total: ₹${totalPrice ?? 0}`
         );
     }
 
     return (
-        <article className="product-card">
-            <div className="product-image">
+        <article className="flex h-full flex-col bg-white">
+            {/* Product Image */}
+            <div className="flex h-44 items-center justify-center overflow-hidden bg-white p-4">
                 <img
-                    src={props.imageUrl}
-                    alt={props.name}
+                    src={imageUrl}
+                    alt={name}
+                    className="h-full w-full object-contain transition-transform duration-300 hover:scale-105"
                 />
             </div>
 
-            <div className="product-info">
-                <h2>{props.name}</h2>
+            {/* Product Information */}
+            <div className="flex flex-1 flex-col px-4 pb-5 text-center">
+                <h3 className="min-h-12 text-sm font-bold uppercase leading-5 text-orange-500">
+                    {name}
+                </h3>
 
-                {props.productCode && (
-                    <p className="product-code">
-                        #{props.productCode}
+                {productCode && (
+                    <p className="mt-1 text-xs text-gray-500">
+                        #{productCode}
                     </p>
                 )}
 
-                {props.rating !== undefined && (
-                    <div className="product-rating">
-                        <span className="rating-stars">
+                {unitPrice && (
+                    <p className="mt-1 text-xs text-gray-500">
+                        #{unitPrice}
+                    </p>
+                )}
+
+                {variant === "listing" &&
+                    price !== undefined && (
+                        <p className="mt-2 text-lg font-bold text-orange-500">
+                            ₹{totalPrice?.toLocaleString("en-IN")}
+                        </p>
+                    )}
+
+                {variant === "featured" &&
+                    price !== undefined && (
+                        <p className="mt-2 text-sm font-semibold text-gray-600">
+                            ₹{price.toLocaleString("en-IN")}
+                        </p>
+                    )}
+
+                {rating !== undefined && (
+                    <div className="mt-2 text-xs text-gray-500">
+                        <span className="text-yellow-500">
                             ★★★★★
-                        </span>
+                        </span>{" "}
+                        {rating}
 
-                        <span className="rating-value">
-                            {props.rating}
-                        </span>
-
-                        {props.reviewCount !== undefined && (
-                            <span className="review-count">
-                                ({props.reviewCount})
+                        {reviewCount !== undefined && (
+                            <span>
+                                {" "}
+                                ({reviewCount})
                             </span>
                         )}
                     </div>
                 )}
 
-                <div className="product-quantity">
-                    <label htmlFor={`quantity-${props.id}`}>
-                        QTY:
-                    </label>
+                {/* Quantity Selector - Listing Only */}
+                {variant === "listing" && (
+                    <div className="mt-4 flex items-center justify-center gap-2">
+                        <span className="text-xs font-medium text-gray-500">
+                            QTY:
+                        </span>
 
-                    <select
-                        id={`quantity-${props.id}`}
-                        defaultValue="1"
+                        <button
+                            type="button"
+                            onClick={decreaseQuantity}
+                            disabled={quantity === 1}
+                            className="flex h-7 w-7 items-center justify-center rounded border border-gray-300 text-sm font-bold text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                            −
+                        </button>
+
+                        <span className="flex h-7 min-w-8 items-center justify-center rounded border border-gray-300 px-2 text-sm font-semibold">
+                            {quantity}
+                        </span>
+
+                        <button
+                            type="button"
+                            onClick={increaseQuantity}
+                            className="flex h-7 w-7 items-center justify-center rounded border border-gray-300 text-sm font-bold text-gray-700 transition hover:bg-gray-100"
+                        >
+                            +
+                        </button>
+                    </div>
+                )}
+
+                {/* Add To Cart */}
+                <div className="mt-4">
+                    <Button
+                        variant="primary"
+                        onClick={handleAddToCart}
                     >
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                    </select>
+                        ADD TO CART
+                    </Button>
                 </div>
 
-                <button
-                    className="add-to-cart"
-                    onClick={handleAddToCart}
-                >
-                    ADD TO CART
-                </button>
-
-                <button className="shopping-list">
-                    + SHOPPING LIST
-                </button>
+                {/* Shopping List only for Featured */}
+                {variant === "featured" && (
+                    <button
+                        type="button"
+                        className="mt-3 text-xs font-bold text-orange-500 hover:text-orange-600"
+                    >
+                        + SHOPPING LIST
+                    </button>
+                )}
             </div>
         </article>
     );

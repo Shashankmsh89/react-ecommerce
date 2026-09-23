@@ -6,6 +6,9 @@ export interface Product {
     rating?: number;
     reviewCount?: number;
     productCode?: string;
+    Price?: number;
+    unitPrice?: number;
+    variant?: "featured" | "listing";
 }
 
 export const products: Product[] = [
@@ -18,6 +21,9 @@ export const products: Product[] = [
         rating: 4.8,
         reviewCount: 320,
         productCode: "IPH16PRO001",
+        Price: 119999,
+        unitPrice: 119999,
+        variant: "featured",
     },
     {
         id: 2,
@@ -28,6 +34,8 @@ export const products: Product[] = [
         rating: 4.7,
         reviewCount: 320,
         productCode: "SAMS25-001",
+        Price: 79999,
+        variant: "listing",
     },
     {
         id: 3,
@@ -38,6 +46,8 @@ export const products: Product[] = [
         rating: 4.6,
         reviewCount: 320,
         productCode: "NIKEAM27001",
+        Price: 12999,
+        variant: "listing",
     },
     {
         id: 4,
@@ -48,6 +58,8 @@ export const products: Product[] = [
         rating: 4.9,
         reviewCount: 320,
         productCode: "SONYWH1000XM5",
+        Price: 29999,
+        variant: "listing",
     },
     {
         id: 5,
@@ -58,5 +70,9 @@ export const products: Product[] = [
         rating: 4.7,
         reviewCount: 320,
         productCode: "APWS1001",
+        Price: 46999,
+        variant: "featured",
     },
 ];
+
+export default products;

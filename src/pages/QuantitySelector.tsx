@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function QuantitySelector() {
+export function QuantitySelector() {
     const productName = "Sony WH-1000XM5";
     const unitPrice = 29999;
 
