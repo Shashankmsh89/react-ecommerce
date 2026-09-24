@@ -1,5 +1,5 @@
 import ProductCard from "./ProductCard";
-import type { Product } from "../data/products";
+import type { Product } from "../types/product";
 
 interface ProductGridProps {
     products: Product[];
@@ -7,14 +7,19 @@ interface ProductGridProps {
 
 function ProductGrid({ products }: ProductGridProps) {
     return (
-        <section className="product-grid">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
             {products.map((product) => (
                 <ProductCard
                     key={product.id}
-                    {...product}
+                    name={product.name}
+                    imageUrl={product.image}
+                    price={product.price}
+                    unitPrice={product.unitsPrice}
+                    productCode={product.productCode}
+                    variant="listing"
                 />
             ))}
-        </section>
+        </div>
     );
 }
 
