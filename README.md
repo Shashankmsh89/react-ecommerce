@@ -1,75 +1,179 @@
-# React + TypeScript + Vite
+# React E-Commerce Training Project
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React e-commerce frontend built step-by-step as part of the Fresher Development Program using **React, TypeScript, Tailwind CSS, and Vite**.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React + TypeScript
+- Vite
+- Tailwind CSS
+- React Router
+- Lucide React
+- REST API
+- DummyJSON
+- ESLint
+- Git & GitHub
 
-## React Compiler
+## Project Overview
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Online Express** is a responsive consumer e-commerce frontend developed through eight assignments.
 
-## Expanding the ESLint configuration
+The project covers:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Reusable React components
+- Product cards
+- Quantity management
+- Category filtering
+- Search
+- Sorting
+- REST API integration
+- Loading & error states
+- Responsive design
+- Conditional rendering
+- Product discounts & SALE badges
+- Sticky header & filters
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# Assignments
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Assignment 1 — React Fundamentals
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- JSX and functional components
+- TypeScript
+- Event handling
+- Basic styling
+- Button interaction
 
-```
+## Assignment 2 — Product Card
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+- Reusable `ProductCard`
+- Props and TypeScript interfaces
+- Product images and information
+- Rating and reviews
+- Quantity selector
+- Add to Cart
+- Shopping List
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Assignment 3 — Reusable Components
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Created reusable:
 
-```
+- `Button`
+- `Card`
+
+Covered:
+
+- Props
+- Variants
+- `children`
+- Component composition
+- Tailwind CSS
+
+## Assignment 4 — Quantity Selector
+
+- `useState`
+- Functional state updates
+- Increase/decrease quantity
+- Minimum quantity validation
+- Dynamic total price
+
+## Assignment 5 — Product Filtering
+
+- `map()`
+- `filter()`
+- Category checkboxes
+- Multiple category selection
+- Empty states
+- Featured and listing product variants
+
+## Assignment 6 — E-Commerce Pages
+
+Implemented:
+
+- Home page
+- Product listing page
+- Header
+- Hero
+- Category grid
+- Product filters
+- Product grid
+- Footer
+- React Router
+- Responsive layouts
+
+## Assignment 7 — REST API Integration
+
+Integrated the **DummyJSON Products API**.
+
+Covered:
+
+- `useEffect`
+- `fetch`
+- API service layer
+- Data transformation
+- Loading skeleton
+- Error handling
+- Retry
+- `AbortController`
+
+API flow:
+
+```text
+API
+ ↓
+productService
+ ↓
+transformProduct()
+ ↓
+Product
+ ↓
+ProductList
+ ↓
+ProductGrid
+ ↓
+ProductCard
+
+## Assignment 8 — Product Search, Filter & Sort
+
+### Implemented
+
+- Product search
+- Case-insensitive search
+- Dynamic category filtering
+- Name sorting
+- Price sorting
+- Rating sorting
+- Product result count
+- Combined search, filter, and sort
+- Conditional SALE badges
+- Original and discounted prices
+- Responsive product grid
+- Sticky header
+- Sticky desktop filters
+
+### Processing Flow
+
+```text
+Products
+   ↓
+Search
+   ↓
+Category Filter
+   ↓
+Sort
+   ↓
+Product Grid
+
+
+One tiny correction 
+
+I changed:
+
+> `Combined search, filter and sort`
+
+to:
+
+> `Combined search, filter, and sort`
+
+and added `### Implemented` / `### Processing Flow` so the Markdown hierarchy is clean.
+
+This is **short, professional, and GitHub-friendly**. No need to make the README longer than this. 🔥
