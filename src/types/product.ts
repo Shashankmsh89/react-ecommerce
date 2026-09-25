@@ -6,6 +6,8 @@ export interface Product {
     image: string;
     productCode: string;
     unitsPrice?: number;
+    discountPercentage: number;
+    rating: number;
 }
 
 export interface DummyJsonProduct {
@@ -14,6 +16,8 @@ export interface DummyJsonProduct {
     price: number;
     category: string;
     thumbnail: string;
+    discountPercentage: number;
+    rating: number;
 }
 
 export interface DummyJsonProductResponse {
@@ -22,3 +26,12 @@ export interface DummyJsonProductResponse {
     skip: number;
     limit: number;
 }
+
+export type SortOption =
+    | ""
+    | "price-asc"
+    | "price-desc"
+    | "name-asc"
+    | "name-desc"
+    | "rating-asc"
+    | "rating-desc";

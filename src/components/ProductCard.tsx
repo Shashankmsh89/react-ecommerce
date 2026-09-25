@@ -9,6 +9,7 @@ interface ProductCardProps {
     productCode?: string;
     price?: number;
     unitPrice?: number;
+    discountPercentage?: number;
     variant?: "featured" | "listing";
 }
 
@@ -20,12 +21,18 @@ function ProductCard({
     productCode,
     price,
     unitPrice,
+    discountPercentage,
     variant = "featured",
 }: ProductCardProps) {
     const [quantity, setQuantity] = useState(1);
 
     const totalPrice =
         price !== undefined ? price * quantity : undefined;
+
+    const originalPrice =
+        discountPercentage !== undefined && discountPercentage > 0 && price !== undefined
+            ? price / (1 - discountPercentage / 100)
+            : price;
 
     function increaseQuantity() {
         setQuantity(
@@ -48,7 +55,15 @@ function ProductCard({
     return (
         <article className="flex h-full flex-col bg-white">
             {/* Product Image */}
-            <div className="flex h-44 items-center justify-center overflow-hidden bg-white p-4">
+            {/* Product Image */}
+            <div className="relative flex h-44 items-center justify-center overflow-hidden bg-white p-4">
+                {discountPercentage !== undefined &&
+                    discountPercentage >= 10 && (
+                        <span className="absolute left-2 top-2 z-10 rounded-sm bg-orange-500 px-2 py-1 text-[10px] font-bold text-white">
+                            SALE
+                        </span>
+                    )}
+
                 <img
                     src={imageUrl}
                     alt={name}
@@ -74,12 +89,20 @@ function ProductCard({
                     </p>
                 )}
 
-                {variant === "listing" &&
-                    price !== undefined && (
-                        <p className="mt-2 text-lg font-bold text-orange-500">
+                {variant === "listing" && price !== undefined && (
+                    <div className="mt-2">
+                        {discountPercentage !== undefined &&
+                            discountPercentage >= 10 && (
+                                <p className="text-xs text-gray-400 line-through">
+                                    ₹{originalPrice?.toLocaleString("en-IN")}
+                                </p>
+                            )}
+
+                        <p className="text-lg font-bold text-orange-500">
                             ₹{totalPrice?.toLocaleString("en-IN")}
                         </p>
-                    )}
+                    </div>
+                )}
 
                 {variant === "featured" &&
                     price !== undefined && (

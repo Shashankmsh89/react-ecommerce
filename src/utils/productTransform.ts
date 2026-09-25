@@ -8,5 +8,7 @@ export function transformProduct(apiProduct: DummyJsonProduct): Product {
         category: apiProduct.category,
         productCode: `DUM-${apiProduct.id}`,
         image: apiProduct.thumbnail,
+        discountPercentage: apiProduct.discountPercentage,
+        rating: apiProduct.rating,
     };
 }

@@ -16,6 +16,7 @@ function ProductGrid({ products }: ProductGridProps) {
                     price={product.price}
                     unitPrice={product.unitsPrice}
                     productCode={product.productCode}
+                    discountPercentage={product.discountPercentage}
                     variant="listing"
                 />
             ))}
