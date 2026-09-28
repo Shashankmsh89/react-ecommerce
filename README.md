@@ -164,16 +164,3 @@ Sort
 Product Grid
 
 
-One tiny correction 
-
-I changed:
-
-> `Combined search, filter and sort`
-
-to:
-
-> `Combined search, filter, and sort`
-
-and added `### Implemented` / `### Processing Flow` so the Markdown hierarchy is clean.
-
-This is **short, professional, and GitHub-friendly**. No need to make the README longer than this. 🔥

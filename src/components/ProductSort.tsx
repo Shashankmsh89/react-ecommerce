@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { SortOption } from "../types/product";
 
 interface ProductSortProps {
@@ -20,10 +20,21 @@ function ProductSort({
                 : value.startsWith("rating")
                     ? "rating"
                     : null
+
     );
+    useEffect(() => {
+        if (value === "") {
+            setExpandedSort(null);
+        }
+    }, [value]);
 
     function handleSortChange(option: SortOption) {
         onChange(option);
+    }
+
+    function clearSort() {
+        onChange("");
+        setExpandedSort(null);
     }
 
     function toggleSortGroup(
@@ -48,19 +59,19 @@ function ProductSort({
                         type="button"
                         onClick={() => toggleSortGroup("name")}
                         className={`flex w-full items-center justify-between rounded-sm px-3 py-2 text-left font-semibold ${expandedSort === "name"
-                                ? "bg-orange-50 text-orange-500"
-                                : "hover:bg-gray-50"
+                            ? "bg-orange-50 text-orange-500"
+                            : "hover:bg-gray-50"
                             }`}
                     >
                         <span className="flex items-center gap-2">
                             <span
                                 className={`h-4 w-4 rounded-full border-2 ${value.startsWith("name")
-                                        ? "border-orange-500"
-                                        : "border-gray-300"
+                                    ? "border-orange-500"
+                                    : "border-gray-300"
                                     }`}
                             >
                                 {value.startsWith("name") && (
-                                    <span className="mx-auto mt-[3px] block h-1.5 w-1.5 rounded-full bg-orange-500" />
+                                    <span className="mx-auto mt-0.75 block h-1.5 w-1.5 rounded-full bg-orange-500" />
                                 )}
                             </span>
 
@@ -68,9 +79,14 @@ function ProductSort({
                         </span>
 
                         {value.startsWith("name") && (
-                            <span className="text-lg leading-none">
+                            <button
+                                type="button"
+                                onClick={clearSort}
+                                className="text-lg leading-none"
+                                aria-label="Clear name sorting"
+                            >
                                 ×
-                            </span>
+                            </button>
                         )}
                     </button>
 
@@ -111,19 +127,19 @@ function ProductSort({
                         type="button"
                         onClick={() => toggleSortGroup("price")}
                         className={`flex w-full items-center justify-between rounded-sm px-3 py-2 text-left font-semibold ${expandedSort === "price"
-                                ? "bg-orange-50 text-orange-500"
-                                : "hover:bg-gray-50"
+                            ? "bg-orange-50 text-orange-500"
+                            : "hover:bg-gray-50"
                             }`}
                     >
                         <span className="flex items-center gap-2">
                             <span
                                 className={`h-4 w-4 rounded-full border-2 ${value.startsWith("price")
-                                        ? "border-orange-500"
-                                        : "border-gray-300"
+                                    ? "border-orange-500"
+                                    : "border-gray-300"
                                     }`}
                             >
                                 {value.startsWith("price") && (
-                                    <span className="mx-auto mt-[3px] block h-1.5 w-1.5 rounded-full bg-orange-500" />
+                                    <span className="mx-auto mt-0.75 block h-1.5 w-1.5 rounded-full bg-orange-500" />
                                 )}
                             </span>
 
@@ -131,9 +147,14 @@ function ProductSort({
                         </span>
 
                         {value.startsWith("price") && (
-                            <span className="text-lg leading-none">
+                            <button
+                                type="button"
+                                onClick={clearSort}
+                                className="text-lg leading-none"
+                                aria-label="Clear price sorting"
+                            >
                                 ×
-                            </span>
+                            </button>
                         )}
                     </button>
 
@@ -174,19 +195,19 @@ function ProductSort({
                         type="button"
                         onClick={() => toggleSortGroup("rating")}
                         className={`flex w-full items-center justify-between rounded-sm px-3 py-2 text-left font-semibold ${expandedSort === "rating"
-                                ? "bg-orange-50 text-orange-500"
-                                : "hover:bg-gray-50"
+                            ? "bg-orange-50 text-orange-500"
+                            : "hover:bg-gray-50"
                             }`}
                     >
                         <span className="flex items-center gap-2">
                             <span
                                 className={`h-4 w-4 rounded-full border-2 ${value.startsWith("rating")
-                                        ? "border-orange-500"
-                                        : "border-gray-300"
+                                    ? "border-orange-500"
+                                    : "border-gray-300"
                                     }`}
                             >
                                 {value.startsWith("rating") && (
-                                    <span className="mx-auto mt-[3px] block h-1.5 w-1.5 rounded-full bg-orange-500" />
+                                    <span className="mx-auto mt-0.75 block h-1.5 w-1.5 rounded-full bg-orange-500" />
                                 )}
                             </span>
 
@@ -194,9 +215,14 @@ function ProductSort({
                         </span>
 
                         {value.startsWith("rating") && (
-                            <span className="text-lg leading-none">
+                            <button
+                                type="button"
+                                onClick={clearSort}
+                                className="text-lg leading-none"
+                                aria-label="Clear rating sorting"
+                            >
                                 ×
-                            </span>
+                            </button>
                         )}
                     </button>
 

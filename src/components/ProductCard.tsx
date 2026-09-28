@@ -158,7 +158,7 @@ function ProductCard({
                 )}
 
                 {/* Add To Cart */}
-                <div className="mt-4">
+                <div className="mt-auto pt-4">
                     <Button
                         variant="primary"
                         onClick={handleAddToCart}

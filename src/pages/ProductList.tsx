@@ -53,6 +53,11 @@ function ProductList() {
     function refreshProducts() {
         setLoading(true);
         setError(null);
+
+        setSearchTerm("");
+        setSelectedCategories([]);
+        setSortOption("");
+
         setRefreshKey((current) => current + 1);
     }
 
