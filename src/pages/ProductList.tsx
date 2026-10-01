@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Button from "../components/Button";
 import Header from "../components/Header";
+import Pagination from "../components/Pagination";
 import ProductError from "../components/ProductError";
 import ProductFilters from "../components/ProductFilters";
 import ProductGrid from "../components/ProductGrid";
@@ -8,6 +9,8 @@ import ProductSkeleton from "../components/ProductSkeleton";
 import { fetchProducts } from "../services/productService";
 import type { Product, SortOption } from "../types/product";
 import { getCategories } from "../utils/category";
+
+const PRODUCTS_PER_PAGE = 8;
 
 function isAbortError(error: unknown): boolean {
     return error instanceof DOMException && error.name === "AbortError";
@@ -18,10 +21,16 @@ function ProductList() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [refreshKey, setRefreshKey] = useState(0);
+
     const [selectedCategories, setSelectedCategories] =
         useState<string[]>([]);
+
     const [searchTerm, setSearchTerm] = useState("");
-    const [sortOption, setSortOption] = useState<SortOption>("");
+
+    const [sortOption, setSortOption] =
+        useState<SortOption>("");
+
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -36,7 +45,10 @@ function ProductList() {
                 setLoading(false);
             })
             .catch((requestError: unknown) => {
-                if (controller.signal.aborted || isAbortError(requestError)) {
+                if (
+                    controller.signal.aborted ||
+                    isAbortError(requestError)
+                ) {
                     return;
                 }
 
@@ -57,8 +69,14 @@ function ProductList() {
         setSearchTerm("");
         setSelectedCategories([]);
         setSortOption("");
+        setCurrentPage(1);
 
         setRefreshKey((current) => current + 1);
+    }
+
+    function handleSearchChange(value: string) {
+        setSearchTerm(value);
+        setCurrentPage(1);
     }
 
     function toggleCategory(category: string) {
@@ -70,6 +88,13 @@ function ProductList() {
                 )
                 : [...currentCategories, category]
         );
+
+        setCurrentPage(1);
+    }
+
+    function handleSortChange(value: SortOption) {
+        setSortOption(value);
+        setCurrentPage(1);
     }
 
     // 1. Search
@@ -113,6 +138,19 @@ function ProductList() {
         }
     });
 
+    // 4. Pagination
+    const totalPages = Math.ceil(
+        sortedProducts.length / PRODUCTS_PER_PAGE
+    );
+
+    const startIndex =
+        (currentPage - 1) * PRODUCTS_PER_PAGE;
+
+    const paginatedProducts = sortedProducts.slice(
+        startIndex,
+        startIndex + PRODUCTS_PER_PAGE
+    );
+
     const categories = getCategories(
         products.map((product) => product.category)
     );
@@ -122,7 +160,7 @@ function ProductList() {
             <Header
                 showSearch
                 searchTerm={searchTerm}
-                onSearchChange={setSearchTerm}
+                onSearchChange={handleSearchChange}
             />
 
             <main className="min-h-screen bg-gray-100">
@@ -148,13 +186,9 @@ function ProductList() {
                         </Button>
                     </div>
 
-                    {/* Search */}
-                    <div className="mb-4">
-                    </div>
-
                     {/* Result Count */}
                     {!loading && !error && (
-                        <p className="mb-4 text-xs text-gray-500 text-center" >
+                        <p className="mb-4 text-center text-xs text-gray-500">
                             Showing {sortedProducts.length} results
                             {searchTerm.trim()
                                 ? ` for "${searchTerm}"`
@@ -171,7 +205,7 @@ function ProductList() {
                             selectedCategories={selectedCategories}
                             onToggleCategory={toggleCategory}
                             sortOption={sortOption}
-                            onSortChange={setSortOption}
+                            onSortChange={handleSortChange}
                         />
 
                         {/* Products */}
@@ -184,9 +218,17 @@ function ProductList() {
                                     onRetry={refreshProducts}
                                 />
                             ) : sortedProducts.length > 0 ? (
-                                <ProductGrid
-                                    products={sortedProducts}
-                                />
+                                <>
+                                    <ProductGrid
+                                        products={paginatedProducts}
+                                    />
+
+                                    <Pagination
+                                        currentPage={currentPage}
+                                        totalPages={totalPages}
+                                        onPageChange={setCurrentPage}
+                                    />
+                                </>
                             ) : (
                                 <div className="rounded-sm border border-gray-200 bg-white p-10 text-center">
                                     <p className="mb-2 text-base font-semibold text-gray-800">

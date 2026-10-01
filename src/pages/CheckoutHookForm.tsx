@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import Footer from "../components/Footer";
+import { useForm, useWatch } from "react-hook-form";
 
+import Footer from "../components/Footer";
 import Header from "../components/Header";
 import Button from "../components/Button";
 
@@ -19,7 +19,7 @@ function CheckoutHookForm() {
         handleSubmit,
         reset,
         setValue,
-        watch,
+        control,
         formState: { errors, isValid },
     } = useForm<CheckoutForm>({
         mode: "onChange",
@@ -49,8 +49,15 @@ function CheckoutHookForm() {
     const [locationLoading, setLocationLoading] =
         useState(false);
 
-    const selectedCountry = watch("country");
-    const selectedState = watch("state");
+    const selectedCountry = useWatch({
+        control,
+        name: "country",
+    });
+
+    const selectedState = useWatch({
+        control,
+        name: "state",
+    });
 
     const [successMessage, setSuccessMessage] =
         useState("");
@@ -86,7 +93,7 @@ function CheckoutHookForm() {
         setValue("state", "");
         setValue("city", "");
 
-        -      setStates([]);
+        setStates([]);
         setCities([]);
 
         if (!country) {
@@ -224,6 +231,7 @@ function CheckoutHookForm() {
                             Review
                         </span>
                     </div>
+
                 </div>
 
                 <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
@@ -645,6 +653,7 @@ function CheckoutHookForm() {
                                         </p>
                                     )}
                                 </div>
+
                             </div>
 
                             {/* Shipping Method */}
@@ -696,6 +705,7 @@ function CheckoutHookForm() {
                                             </label>
                                         )
                                     )}
+
                                 </div>
 
                                 {errors.shippingMethod && (
@@ -707,10 +717,11 @@ function CheckoutHookForm() {
                                         }
                                     </p>
                                 )}
+
                             </fieldset>
 
-
                         </form>
+
                     </section>
 
                     {/* Order Summary */}
@@ -751,9 +762,11 @@ function CheckoutHookForm() {
                                     $24.00
                                 </span>
                             </div>
+
                         </div>
 
                         <div className="mt-4 flex items-center justify-between border-t-2 border-orange-500 pt-4 text-lg font-bold">
+
                             <span className="text-gray-900">
                                 Total
                             </span>
@@ -774,8 +787,11 @@ function CheckoutHookForm() {
                                 Place Order
                             </Button>
                         </div>
+
                     </aside>
+
                 </div>
+
             </main>
 
             <Footer />

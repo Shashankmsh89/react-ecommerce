@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { SortOption } from "../types/product";
 
 interface ProductSortProps {
@@ -6,27 +6,22 @@ interface ProductSortProps {
     onChange: (value: SortOption) => void;
 }
 
+type SortGroup = "name" | "price" | "rating";
+
 function ProductSort({
     value,
     onChange,
 }: ProductSortProps) {
-    const [expandedSort, setExpandedSort] = useState<
-        "name" | "price" | "rating" | null
-    >(
-        value.startsWith("name")
-            ? "name"
-            : value.startsWith("price")
-                ? "price"
-                : value.startsWith("rating")
-                    ? "rating"
-                    : null
-
-    );
-    useEffect(() => {
-        if (value === "") {
-            setExpandedSort(null);
-        }
-    }, [value]);
+    const [expandedSort, setExpandedSort] =
+        useState<SortGroup | null>(
+            value.startsWith("name")
+                ? "name"
+                : value.startsWith("price")
+                    ? "price"
+                    : value.startsWith("rating")
+                        ? "rating"
+                        : null
+        );
 
     function handleSortChange(option: SortOption) {
         onChange(option);
@@ -37,12 +32,14 @@ function ProductSort({
         setExpandedSort(null);
     }
 
-    function toggleSortGroup(
-        group: "name" | "price" | "rating"
-    ) {
+    function toggleSortGroup(group: SortGroup) {
         setExpandedSort((currentGroup) =>
             currentGroup === group ? null : group
         );
+    }
+
+    function isSelected(group: SortGroup) {
+        return value.startsWith(group);
     }
 
     return (
@@ -55,66 +52,88 @@ function ProductSort({
 
                 {/* Name */}
                 <div>
-                    <button
-                        type="button"
-                        onClick={() => toggleSortGroup("name")}
-                        className={`flex w-full items-center justify-between rounded-sm px-3 py-2 text-left font-semibold ${expandedSort === "name"
-                            ? "bg-orange-50 text-orange-500"
+                    <div
+                        className={`flex w-full items-center rounded-sm ${expandedSort === "name"
+                            ? "bg-orange-50"
                             : "hover:bg-gray-50"
                             }`}
                     >
-                        <span className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() =>
+                                toggleSortGroup("name")
+                            }
+                            aria-expanded={
+                                expandedSort === "name"
+                            }
+                            className={`flex flex-1 items-center gap-2 px-3 py-2 text-left font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500 ${expandedSort === "name"
+                                ? "text-orange-500"
+                                : "text-gray-700 hover:text-orange-500"
+                                }`}
+                        >
                             <span
-                                className={`h-4 w-4 rounded-full border-2 ${value.startsWith("name")
+                                className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${isSelected("name")
                                     ? "border-orange-500"
                                     : "border-gray-300"
                                     }`}
                             >
-                                {value.startsWith("name") && (
-                                    <span className="mx-auto mt-0.75 block h-1.5 w-1.5 rounded-full bg-orange-500" />
+                                {isSelected("name") && (
+                                    <span className="block h-1.5 w-1.5 rounded-full bg-orange-500" />
                                 )}
                             </span>
 
                             Name
-                        </span>
+                        </button>
 
-                        {value.startsWith("name") && (
+                        {isSelected("name") && (
                             <button
                                 type="button"
                                 onClick={clearSort}
-                                className="text-lg leading-none"
                                 aria-label="Clear name sorting"
+                                className="mr-2 flex h-6 w-6 items-center justify-center rounded-sm text-base leading-none text-gray-400 transition-colors hover:bg-orange-100 hover:text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
                             >
                                 ×
                             </button>
                         )}
-                    </button>
+                    </div>
 
                     {expandedSort === "name" && (
                         <div className="ml-5 mt-2 space-y-2 border-l-2 border-orange-500 pl-4">
-                            <label className="flex cursor-pointer items-center gap-2">
+                            <label className="flex cursor-pointer items-center gap-2 transition-colors hover:text-orange-500">
                                 <input
                                     type="radio"
                                     name="sort"
                                     value="name-asc"
-                                    checked={value === "name-asc"}
-                                    onChange={() =>
-                                        handleSortChange("name-asc")
+                                    checked={
+                                        value === "name-asc"
                                     }
+                                    onChange={() =>
+                                        handleSortChange(
+                                            "name-asc"
+                                        )
+                                    }
+                                    className="accent-orange-500 focus:ring-orange-500"
                                 />
+
                                 A - Z
                             </label>
 
-                            <label className="flex cursor-pointer items-center gap-2">
+                            <label className="flex cursor-pointer items-center gap-2 transition-colors hover:text-orange-500">
                                 <input
                                     type="radio"
                                     name="sort"
                                     value="name-desc"
-                                    checked={value === "name-desc"}
-                                    onChange={() =>
-                                        handleSortChange("name-desc")
+                                    checked={
+                                        value === "name-desc"
                                     }
+                                    onChange={() =>
+                                        handleSortChange(
+                                            "name-desc"
+                                        )
+                                    }
+                                    className="accent-orange-500 focus:ring-orange-500"
                                 />
+
                                 Z - A
                             </label>
                         </div>
@@ -123,66 +142,88 @@ function ProductSort({
 
                 {/* Price */}
                 <div>
-                    <button
-                        type="button"
-                        onClick={() => toggleSortGroup("price")}
-                        className={`flex w-full items-center justify-between rounded-sm px-3 py-2 text-left font-semibold ${expandedSort === "price"
-                            ? "bg-orange-50 text-orange-500"
+                    <div
+                        className={`flex w-full items-center rounded-sm ${expandedSort === "price"
+                            ? "bg-orange-50"
                             : "hover:bg-gray-50"
                             }`}
                     >
-                        <span className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() =>
+                                toggleSortGroup("price")
+                            }
+                            aria-expanded={
+                                expandedSort === "price"
+                            }
+                            className={`flex flex-1 items-center gap-2 px-3 py-2 text-left font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500 ${expandedSort === "price"
+                                ? "text-orange-500"
+                                : "text-gray-700 hover:text-orange-500"
+                                }`}
+                        >
                             <span
-                                className={`h-4 w-4 rounded-full border-2 ${value.startsWith("price")
+                                className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${isSelected("price")
                                     ? "border-orange-500"
                                     : "border-gray-300"
                                     }`}
                             >
-                                {value.startsWith("price") && (
-                                    <span className="mx-auto mt-0.75 block h-1.5 w-1.5 rounded-full bg-orange-500" />
+                                {isSelected("price") && (
+                                    <span className="block h-1.5 w-1.5 rounded-full bg-orange-500" />
                                 )}
                             </span>
 
                             Price
-                        </span>
+                        </button>
 
-                        {value.startsWith("price") && (
+                        {isSelected("price") && (
                             <button
                                 type="button"
                                 onClick={clearSort}
-                                className="text-lg leading-none"
                                 aria-label="Clear price sorting"
+                                className="mr-2 flex h-6 w-6 items-center justify-center rounded-sm text-base leading-none text-gray-400 transition-colors hover:bg-orange-100 hover:text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
                             >
                                 ×
                             </button>
                         )}
-                    </button>
+                    </div>
 
                     {expandedSort === "price" && (
                         <div className="ml-5 mt-2 space-y-2 border-l-2 border-orange-500 pl-4">
-                            <label className="flex cursor-pointer items-center gap-2">
+                            <label className="flex cursor-pointer items-center gap-2 transition-colors hover:text-orange-500">
                                 <input
                                     type="radio"
                                     name="sort"
                                     value="price-asc"
-                                    checked={value === "price-asc"}
-                                    onChange={() =>
-                                        handleSortChange("price-asc")
+                                    checked={
+                                        value === "price-asc"
                                     }
+                                    onChange={() =>
+                                        handleSortChange(
+                                            "price-asc"
+                                        )
+                                    }
+                                    className="accent-orange-500 focus:ring-orange-500"
                                 />
+
                                 Low - High
                             </label>
 
-                            <label className="flex cursor-pointer items-center gap-2">
+                            <label className="flex cursor-pointer items-center gap-2 transition-colors hover:text-orange-500">
                                 <input
                                     type="radio"
                                     name="sort"
                                     value="price-desc"
-                                    checked={value === "price-desc"}
-                                    onChange={() =>
-                                        handleSortChange("price-desc")
+                                    checked={
+                                        value === "price-desc"
                                     }
+                                    onChange={() =>
+                                        handleSortChange(
+                                            "price-desc"
+                                        )
+                                    }
+                                    className="accent-orange-500 focus:ring-orange-500"
                                 />
+
                                 High - Low
                             </label>
                         </div>
@@ -191,72 +232,93 @@ function ProductSort({
 
                 {/* Rating */}
                 <div>
-                    <button
-                        type="button"
-                        onClick={() => toggleSortGroup("rating")}
-                        className={`flex w-full items-center justify-between rounded-sm px-3 py-2 text-left font-semibold ${expandedSort === "rating"
-                            ? "bg-orange-50 text-orange-500"
+                    <div
+                        className={`flex w-full items-center rounded-sm ${expandedSort === "rating"
+                            ? "bg-orange-50"
                             : "hover:bg-gray-50"
                             }`}
                     >
-                        <span className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() =>
+                                toggleSortGroup("rating")
+                            }
+                            aria-expanded={
+                                expandedSort === "rating"
+                            }
+                            className={`flex flex-1 items-center gap-2 px-3 py-2 text-left font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500 ${expandedSort === "rating"
+                                ? "text-orange-500"
+                                : "text-gray-700 hover:text-orange-500"
+                                }`}
+                        >
                             <span
-                                className={`h-4 w-4 rounded-full border-2 ${value.startsWith("rating")
+                                className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${isSelected("rating")
                                     ? "border-orange-500"
                                     : "border-gray-300"
                                     }`}
                             >
-                                {value.startsWith("rating") && (
-                                    <span className="mx-auto mt-0.75 block h-1.5 w-1.5 rounded-full bg-orange-500" />
+                                {isSelected("rating") && (
+                                    <span className="block h-1.5 w-1.5 rounded-full bg-orange-500" />
                                 )}
                             </span>
 
                             Rating
-                        </span>
+                        </button>
 
-                        {value.startsWith("rating") && (
+                        {isSelected("rating") && (
                             <button
                                 type="button"
                                 onClick={clearSort}
-                                className="text-lg leading-none"
                                 aria-label="Clear rating sorting"
+                                className="mr-2 flex h-6 w-6 items-center justify-center rounded-sm text-base leading-none text-gray-400 transition-colors hover:bg-orange-100 hover:text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
                             >
                                 ×
                             </button>
                         )}
-                    </button>
+                    </div>
 
                     {expandedSort === "rating" && (
                         <div className="ml-5 mt-2 space-y-2 border-l-2 border-orange-500 pl-4">
-                            <label className="flex cursor-pointer items-center gap-2">
+                            <label className="flex cursor-pointer items-center gap-2 transition-colors hover:text-orange-500">
                                 <input
                                     type="radio"
                                     name="sort"
                                     value="rating-desc"
-                                    checked={value === "rating-desc"}
-                                    onChange={() =>
-                                        handleSortChange("rating-desc")
+                                    checked={
+                                        value === "rating-desc"
                                     }
+                                    onChange={() =>
+                                        handleSortChange(
+                                            "rating-desc"
+                                        )
+                                    }
+                                    className="accent-orange-500 focus:ring-orange-500"
                                 />
+
                                 High - Low
                             </label>
 
-                            <label className="flex cursor-pointer items-center gap-2">
+                            <label className="flex cursor-pointer items-center gap-2 transition-colors hover:text-orange-500">
                                 <input
                                     type="radio"
                                     name="sort"
                                     value="rating-asc"
-                                    checked={value === "rating-asc"}
-                                    onChange={() =>
-                                        handleSortChange("rating-asc")
+                                    checked={
+                                        value === "rating-asc"
                                     }
+                                    onChange={() =>
+                                        handleSortChange(
+                                            "rating-asc"
+                                        )
+                                    }
+                                    className="accent-orange-500 focus:ring-orange-500"
                                 />
+
                                 Low - High
                             </label>
                         </div>
                     )}
                 </div>
-
             </div>
         </section>
     );
