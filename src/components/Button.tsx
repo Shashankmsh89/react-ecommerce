@@ -3,6 +3,9 @@ interface ButtonProps {
     children: React.ReactNode;
     disabled?: boolean;
     onClick?: () => void;
+    type?: "button" | "submit" | "reset";
+    form?: string;
+    className?: string;
 }
 
 function Button({
@@ -10,6 +13,11 @@ function Button({
     children,
     disabled = false,
     onClick,
+    type = "button",
+    form,
+    className,
+
+
 }: ButtonProps) {
     const baseClasses =
         "rounded-sm px-5 py-2.5 text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50";
@@ -27,8 +35,9 @@ function Button({
 
     return (
         <button
-            type="button"
-            className={`${baseClasses} ${variantClasses[variant]}`}
+            type={type}
+            form={form}
+            className={`${baseClasses} ${variantClasses[variant]} ${className}`}
             disabled={disabled}
             onClick={onClick}
         >
@@ -36,5 +45,6 @@ function Button({
         </button>
     );
 }
+
 
 export default Button;
