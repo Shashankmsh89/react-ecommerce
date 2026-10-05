@@ -1,5 +1,5 @@
 import ProductCard from "./ProductCard";
-import type { Product } from "../types/product";
+import type { Product } from "../types/ecommerce";
 
 interface ProductGridProps {
     products: Product[];
@@ -10,13 +10,12 @@ function ProductGrid({ products }: ProductGridProps) {
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
             {products.map((product) => (
                 <ProductCard
-                    key={product.id}
+                    key={product.productId}
                     name={product.name}
-                    imageUrl={product.image}
+                    imageUrl={`/api/v1/Products/${product.productId}/image`}
                     price={product.price}
-                    unitPrice={product.unitsPrice}
-                    productCode={product.productCode}
-                    discountPercentage={product.discountPercentage}
+                    productCode={`PROD-${product.productId}`}
+                    rating={product.rating}
                     variant="listing"
                 />
             ))}

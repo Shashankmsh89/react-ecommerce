@@ -2,8 +2,8 @@ import { useState } from "react";
 import type { SortOption } from "../types/product";
 
 interface ProductSortProps {
-    value: SortOption;
-    onChange: (value: SortOption) => void;
+    value: string;
+    onChange: (value: string) => void;
 }
 
 type SortGroup = "name" | "price" | "rating";
@@ -66,7 +66,7 @@ function ProductSort({
                             aria-expanded={
                                 expandedSort === "name"
                             }
-                            className={`flex flex-1 items-center gap-2 px-3 py-2 text-left font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500 ${expandedSort === "name"
+                            className={`flex flex-1 items-center gap-2 px-3 py-1 text-left font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500 ${expandedSort === "name"
                                 ? "text-orange-500"
                                 : "text-gray-700 hover:text-orange-500"
                                 }`}
@@ -156,7 +156,7 @@ function ProductSort({
                             aria-expanded={
                                 expandedSort === "price"
                             }
-                            className={`flex flex-1 items-center gap-2 px-3 py-2 text-left font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500 ${expandedSort === "price"
+                            className={`flex flex-1 items-center gap-2 px-3 py-1 text-left font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500 ${expandedSort === "price"
                                 ? "text-orange-500"
                                 : "text-gray-700 hover:text-orange-500"
                                 }`}
@@ -246,7 +246,7 @@ function ProductSort({
                             aria-expanded={
                                 expandedSort === "rating"
                             }
-                            className={`flex flex-1 items-center gap-2 px-3 py-2 text-left font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500 ${expandedSort === "rating"
+                            className={`flex flex-1 items-center gap-2 px-3 py-1 text-left font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500 ${expandedSort === "rating"
                                 ? "text-orange-500"
                                 : "text-gray-700 hover:text-orange-500"
                                 }`}

@@ -13,6 +13,9 @@ interface ProductCardProps {
     variant?: "featured" | "listing";
 }
 
+const FALLBACK_PRODUCT_IMAGE =
+    "https://placehold.co/600x400/f3f4f6/6b7280?text=Product+Image";
+
 function ProductCard({
     name,
     imageUrl,
@@ -101,13 +104,11 @@ function ProductCard({
                 <img
                     src={imageUrl}
                     alt={name}
-                    className="
-                        h-full w-full
-                        object-contain
-                        transition-transform duration-500
-                        ease-out
-                        group-hover:scale-110
-                    "
+                    onError={(event) => {
+                        event.currentTarget.onerror = null;
+                        event.currentTarget.src =
+                            FALLBACK_PRODUCT_IMAGE;
+                    }}
                 />
             </div>
 

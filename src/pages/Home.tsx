@@ -1,33 +1,118 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-
-import Button from "../components/Button";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
-import ProductCard from "../components/ProductCard";
-
-import products from "../data/products";
-
+import { Link, useNavigate } from "react-router-dom";
 import {
     CreditCard,
     Headphones,
     Truck,
 } from "lucide-react";
 
-const categories = [
-    "Accessories/Options",
-    "Technical Attachments",
-    "Engine Parts",
-    "Reman Parts",
-    "Service Kits",
-    "Oil",
-    "Filters",
-    "Aftermarket Attachments",
-];
+import Button from "../components/Button";
+import Footer from "../components/Footer";
+import Header from "../components/Header";
+import ProductCard from "../components/ProductCard";
+
+import {
+    fetchCategories,
+    fetchProducts,
+} from "../services/ecommerceService";
+
+import type {
+    Category,
+    Product,
+} from "../types/ecommerce";
 
 function Home() {
-    const [currentSlide, setCurrentSlide] = useState(0);
-    const [visibleCount, setVisibleCount] = useState(4);
+    const navigate = useNavigate();
+
+    const [products, setProducts] = useState<Product[]>([]);
+    const [categories, setCategories] =
+        useState<Category[]>([]);
+
+    const [loadingProducts, setLoadingProducts] =
+        useState(true);
+
+    const [loadingCategories, setLoadingCategories] =
+        useState(true);
+
+    const [productsError, setProductsError] =
+        useState<string | null>(null);
+
+    const [categoriesError, setCategoriesError] =
+        useState<string | null>(null);
+
+    const [searchTerm, setSearchTerm] =
+        useState("");
+
+    const [currentSlide, setCurrentSlide] =
+        useState(0);
+
+    const [visibleCount, setVisibleCount] =
+        useState(4);
+
+    useEffect(() => {
+        const controller =
+            new AbortController();
+
+        fetchProducts(controller.signal)
+            .then((loadedProducts) => {
+                if (controller.signal.aborted) {
+                    return;
+                }
+
+                setProducts(loadedProducts);
+                setLoadingProducts(false);
+            })
+            .catch((requestError: unknown) => {
+                if (
+                    controller.signal.aborted ||
+                    (requestError instanceof DOMException &&
+                        requestError.name ===
+                        "AbortError")
+                ) {
+                    return;
+                }
+
+                console.error(requestError);
+
+                setProductsError(
+                    "Failed to load featured products."
+                );
+
+                setLoadingProducts(false);
+            });
+
+        fetchCategories(controller.signal)
+            .then((loadedCategories) => {
+                if (controller.signal.aborted) {
+                    return;
+                }
+
+                setCategories(loadedCategories);
+                setLoadingCategories(false);
+            })
+            .catch((requestError: unknown) => {
+                if (
+                    controller.signal.aborted ||
+                    (requestError instanceof DOMException &&
+                        requestError.name ===
+                        "AbortError")
+                ) {
+                    return;
+                }
+
+                console.error(requestError);
+
+                setCategoriesError(
+                    "Failed to load categories."
+                );
+
+                setLoadingCategories(false);
+            });
+
+        return () => {
+            controller.abort();
+        };
+    }, []);
 
     useEffect(() => {
         function updateVisibleCount() {
@@ -77,6 +162,30 @@ function Home() {
         );
     }
 
+    function handleSearch() {
+        const trimmedSearch =
+            searchTerm.trim();
+
+        if (!trimmedSearch) {
+            navigate("/products");
+            return;
+        }
+
+        navigate(
+            `/products?search=${encodeURIComponent(
+                trimmedSearch
+            )}`
+        );
+    }
+
+    function handleSearchKeyDown(
+        event: React.KeyboardEvent<HTMLInputElement>
+    ) {
+        if (event.key === "Enter") {
+            handleSearch();
+        }
+    }
+
     return (
         <div className="min-h-screen bg-white">
             <Header />
@@ -101,13 +210,24 @@ function Home() {
                             <div className="mx-auto flex max-w-lg">
                                 <input
                                     type="text"
+                                    value={searchTerm}
+                                    onChange={(event) =>
+                                        setSearchTerm(
+                                            event.target.value
+                                        )
+                                    }
+                                    onKeyDown={
+                                        handleSearchKeyDown
+                                    }
                                     placeholder="Search products..."
-                                    className="h-9 min-w-0 flex-1 border border-gray-300 bg-white px-3 text-xs outline-none"
+                                    aria-label="Search products"
+                                    className="h-9 min-w-0 flex-1 border border-gray-300 bg-white px-3 text-sm outline-none"
                                 />
 
                                 <button
                                     type="button"
-                                    className="h-9 bg-orange-500 px-5 text-[11px] font-bold text-white transition hover:bg-orange-600"
+                                    onClick={handleSearch}
+                                    className="h-9 bg-orange-500 px-5 text-xs font-bold text-white transition hover:bg-orange-600"
                                 >
                                     SEARCH
                                 </button>
@@ -117,15 +237,17 @@ function Home() {
                 </section>
 
                 {/* Action Cards */}
+                {/* Action Cards */}
                 <section className="px-3 py-6">
                     <div className="mx-auto grid max-w-4xl grid-cols-2 gap-0 md:grid-cols-4">
+
                         {/* Order Now */}
                         <div className="px-5 py-4 text-center">
-                            <h2 className="mb-5 text-sm font-bold">
+                            <h2 className="mb-5 text-[16px] font-bold leading-tight text-gray-900">
                                 Order Now
                             </h2>
 
-                            <p className="mb-8 text-[9px] leading-4 text-gray-500">
+                            <p className="mb-8 text-[11px] leading-[1.4] text-gray-500">
                                 Already know your part
                                 <br />
                                 number?
@@ -140,11 +262,11 @@ function Home() {
 
                         {/* Featured Products */}
                         <div className="bg-gray-200 px-5 py-4 text-center">
-                            <h2 className="mb-5 text-sm font-bold">
+                            <h2 className="mb-5 text-[16px] font-bold leading-tight text-gray-900">
                                 Featured Products
                             </h2>
 
-                            <p className="mb-8 text-[9px] leading-4 text-gray-500">
+                            <p className="mb-8 text-[11px] leading-[1.4] text-gray-500">
                                 Browse through our popular
                                 <br />
                                 products.
@@ -159,11 +281,11 @@ function Home() {
 
                         {/* Categories */}
                         <div className="px-5 py-4 text-center">
-                            <h2 className="mb-5 text-sm font-bold">
+                            <h2 className="mb-5 text-[16px] font-bold leading-tight text-gray-900">
                                 Categories
                             </h2>
 
-                            <p className="mb-8 text-[9px] leading-4 text-gray-500">
+                            <p className="mb-8 text-[11px] leading-[1.4] text-gray-500">
                                 Find the right products in
                                 <br />
                                 our categories.
@@ -178,11 +300,11 @@ function Home() {
 
                         {/* Support */}
                         <div className="bg-gray-200 px-5 py-4 text-center">
-                            <h2 className="mb-5 text-sm font-bold">
+                            <h2 className="mb-5 text-[16px] font-bold leading-tight text-gray-900">
                                 Support
                             </h2>
 
-                            <p className="mb-8 text-[9px] leading-4 text-gray-500">
+                            <p className="mb-8 text-[11px] leading-[1.4] text-gray-500">
                                 Need help with your
                                 <br />
                                 order?
@@ -198,105 +320,169 @@ function Home() {
                 {/* Featured Products Carousel */}
                 <section className="px-3 py-5">
                     <div className="mx-auto max-w-5xl">
-                        <h2 className="mb-6 text-center text-xl font-bold text-gray-900">
+                        <h2 className="mb-6 text-center text-2xl font-bold text-gray-900">
                             Featured Products
                         </h2>
 
-                        <div className="relative">
-                            {/* Previous */}
-                            <button
-                                type="button"
-                                onClick={previousSlide}
-                                disabled={currentSlide === 0}
-                                aria-label="Previous featured products"
-                                className="absolute left-0 top-1/2 z-10 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-300 bg-white text-lg font-bold text-gray-700 shadow-sm transition hover:border-orange-500 hover:text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 disabled:cursor-not-allowed disabled:opacity-30"
-                            >
-                                ‹
-                            </button>
-
-                            {/* Products */}
-                            <div className="overflow-hidden px-2">
-                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                                    {featuredProducts.map(
-                                        (product) => (
-                                            <div
-                                                key={product.id}
-                                                className="min-w-0"
-                                            >
-                                                <ProductCard
-                                                    name={
-                                                        product.name
-                                                    }
-                                                    imageUrl={
-                                                        product.imageUrl
-                                                    }
-                                                    productCode={
-                                                        product.productCode
-                                                    }
-                                                    rating={
-                                                        product.rating
-                                                    }
-                                                    reviewCount={
-                                                        product.reviewCount
-                                                    }
-                                                    price={
-                                                        product.Price
-                                                    }
-                                                    variant="featured"
-                                                />
-                                            </div>
-                                        )
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Next */}
-                            <button
-                                type="button"
-                                onClick={nextSlide}
-                                disabled={
-                                    currentSlide >= maxSlide
-                                }
-                                aria-label="Next featured products"
-                                className="absolute right-0 top-1/2 z-10 flex h-9 w-9 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-300 bg-white text-lg font-bold text-gray-700 shadow-sm transition hover:border-orange-500 hover:text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 disabled:cursor-not-allowed disabled:opacity-30"
-                            >
-                                ›
-                            </button>
-                        </div>
-
-                        {/* Carousel Indicators */}
-                        {maxSlide > 0 && (
-                            <div
-                                className="mt-5 flex justify-center gap-1.5"
-                                aria-label="Featured product carousel navigation"
-                            >
+                        {loadingProducts ? (
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                                 {Array.from({
-                                    length: maxSlide + 1,
+                                    length: visibleCount,
                                 }).map((_, index) => (
-                                    <button
+                                    <div
                                         key={index}
-                                        type="button"
-                                        onClick={() =>
-                                            setCurrentSlide(
-                                                index
-                                            )
-                                        }
-                                        aria-label={`Go to featured products slide ${index + 1
-                                            }`}
-                                        aria-current={
-                                            currentSlide ===
-                                                index
-                                                ? "true"
-                                                : undefined
-                                        }
-                                        className={`h-1.5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500/30 ${currentSlide ===
-                                                index
-                                                ? "w-5 bg-orange-500"
-                                                : "w-1.5 bg-gray-400 hover:bg-orange-400"
-                                            }`}
-                                    />
+                                        className="overflow-hidden rounded-sm border border-gray-200 bg-white"
+                                    >
+                                        <div className="h-48 animate-pulse bg-gray-200" />
+
+                                        <div className="space-y-3 p-4">
+                                            <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200" />
+
+                                            <div className="h-3 w-1/2 animate-pulse rounded bg-gray-200" />
+
+                                            <div className="h-3 w-2/3 animate-pulse rounded bg-gray-200" />
+
+                                            <div className="h-8 w-full animate-pulse rounded bg-gray-200" />
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
+                        ) : productsError ? (
+                            <div className="rounded-sm border border-red-200 bg-red-50 p-8 text-center">
+                                <p className="text-sm font-semibold text-red-700">
+                                    {productsError}
+                                </p>
+
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        window.location.reload()
+                                    }
+                                    className="mt-4 text-sm font-semibold text-orange-500 hover:text-orange-600"
+                                >
+                                    Try Again
+                                </button>
+                            </div>
+                        ) : products.length === 0 ? (
+                            <div className="rounded-sm border border-gray-200 bg-white p-8 text-center">
+                                <p className="text-sm text-gray-500">
+                                    No featured products
+                                    <br />
+                                    available.
+                                </p>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="relative">
+                                    {/* Previous */}
+                                    <button
+                                        type="button"
+                                        onClick={
+                                            previousSlide
+                                        }
+                                        disabled={
+                                            currentSlide ===
+                                            0
+                                        }
+                                        aria-label="Previous featured products"
+                                        className="absolute left-0 top-1/2 z-10 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-300 bg-white text-lg font-bold text-gray-700 shadow-sm transition hover:border-orange-500 hover:text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 disabled:cursor-not-allowed disabled:opacity-30"
+                                    >
+                                        ‹
+                                    </button>
+
+                                    {/* Products */}
+                                    <div className="overflow-hidden px-2">
+                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                                            {featuredProducts.map(
+                                                (product) => (
+                                                    <div
+                                                        key={
+                                                            product.productId
+                                                        }
+                                                        className="min-w-0"
+                                                    >
+                                                        <ProductCard
+                                                            name={
+                                                                product.name
+                                                            }
+                                                            imageUrl={`/api/v1/Products/${product.productId}/image`}
+                                                            productCode={`PROD-${product.productId}`}
+                                                            rating={
+                                                                product.rating
+                                                            }
+                                                            price={
+                                                                product.price
+                                                            }
+                                                            variant="featured"
+                                                        />
+                                                    </div>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Next */}
+                                    <button
+                                        type="button"
+                                        onClick={
+                                            nextSlide
+                                        }
+                                        disabled={
+                                            currentSlide >=
+                                            maxSlide
+                                        }
+                                        aria-label="Next featured products"
+                                        className="absolute right-0 top-1/2 z-10 flex h-9 w-9 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-300 bg-white text-lg font-bold text-gray-700 shadow-sm transition hover:border-orange-500 hover:text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/30 disabled:cursor-not-allowed disabled:opacity-30"
+                                    >
+                                        ›
+                                    </button>
+                                </div>
+
+                                {/* Carousel Indicators */}
+                                {maxSlide > 0 && (
+                                    <div
+                                        className="mt-5 flex justify-center gap-1.5"
+                                        aria-label="Featured product carousel navigation"
+                                    >
+                                        {Array.from({
+                                            length:
+                                                maxSlide +
+                                                1,
+                                        }).map(
+                                            (
+                                                _,
+                                                index
+                                            ) => (
+                                                <button
+                                                    key={
+                                                        index
+                                                    }
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setCurrentSlide(
+                                                            index
+                                                        )
+                                                    }
+                                                    aria-label={`Go to featured products slide ${index +
+                                                        1
+                                                        }`}
+                                                    aria-current={
+                                                        currentSlide ===
+                                                            index
+                                                            ? "true"
+                                                            : undefined
+                                                    }
+                                                    className={`h-1.5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500/30 ${currentSlide ===
+                                                        index
+                                                        ? "w-5 bg-orange-500"
+                                                        : "w-1.5 bg-gray-400 hover:bg-orange-400"
+                                                        }`}
+                                                />
+                                            )
+                                        )}
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                 </section>
@@ -304,37 +490,71 @@ function Home() {
                 {/* Popular Categories */}
                 <section className="px-3 py-5">
                     <div className="mx-auto max-w-4xl">
-                        <h2 className="mb-4 text-center text-xl font-bold">
+                        <h2 className="mb-4 text-center text-2xl font-bold">
                             Popular Categories
                         </h2>
 
-                        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-                            {categories.map((category) => (
-                                <Link
-                                    key={category}
-                                    to="/products"
-                                    className="flex h-8 items-center justify-center border border-gray-400 bg-white px-2 text-[9px] font-semibold text-orange-500 transition hover:border-orange-500 hover:bg-orange-50"
-                                >
-                                    {category}
-                                </Link>
-                            ))}
-                        </div>
+                        {loadingCategories ? (
+                            <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+                                {Array.from({
+                                    length: 8,
+                                }).map((_, index) => (
+                                    <div
+                                        key={index}
+                                        className="h-9 animate-pulse border border-gray-200 bg-gray-100"
+                                    />
+                                ))}
+                            </div>
+                        ) : categoriesError ? (
+                            <div className="rounded-sm border border-red-200 bg-red-50 p-6 text-center">
+                                <p className="text-sm font-semibold text-red-700">
+                                    {categoriesError}
+                                </p>
+                            </div>
+                        ) : categories.length === 0 ? (
+                            <div className="rounded-sm border border-gray-200 p-6 text-center">
+                                <p className="text-sm text-gray-500">
+                                    No categories
+                                    <br />
+                                    available.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+                                {categories.map(
+                                    (category) => (
+                                        <Link
+                                            key={
+                                                category.categoryId
+                                            }
+                                            to={`/products?categoryId=${category.categoryId}`}
+                                            className="flex h-9 items-center justify-center border border-gray-400 bg-white px-2 text-sm font-semibold text-orange-500 transition hover:border-orange-500 hover:bg-orange-50"
+                                        >
+                                            {
+                                                category.name
+                                            }
+                                        </Link>
+                                    )
+                                )}
+                            </div>
+                        )}
                     </div>
                 </section>
 
                 {/* Service Strip */}
                 <section className="bg-gray-800 px-4 py-5 text-white">
                     <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 sm:grid-cols-3">
+
                         {/* Secure Payments */}
                         <div className="flex items-center justify-center gap-3">
                             <CreditCard size={22} />
 
                             <div>
-                                <h3 className="text-[10px] font-bold">
+                                <h3 className="text-sm font-bold">
                                     SECURE PAYMENTS
                                 </h3>
 
-                                <p className="text-[9px] text-gray-300">
+                                <p className="text-xs text-gray-300">
                                     Safe and secure checkout
                                 </p>
                             </div>
@@ -345,11 +565,11 @@ function Home() {
                             <Headphones size={22} />
 
                             <div>
-                                <h3 className="text-[10px] font-bold">
+                                <h3 className="text-sm font-bold">
                                     HELP CENTER
                                 </h3>
 
-                                <p className="text-[9px] text-gray-300">
+                                <p className="text-xs text-gray-300">
                                     Get help when you need it
                                 </p>
                             </div>
@@ -360,12 +580,14 @@ function Home() {
                             <Truck size={22} />
 
                             <div>
-                                <h3 className="text-[10px] font-bold">
+                                <h3 className="text-sm font-bold">
                                     RELIABLE SHIPPING
                                 </h3>
 
-                                <p className="text-[9px] text-gray-300">
-                                    Fast and dependable delivery
+                                <p className="text-xs text-gray-300">
+                                    Fast and dependable
+                                    <br />
+                                    delivery
                                 </p>
                             </div>
                         </div>

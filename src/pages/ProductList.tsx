@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+
 import Button from "../components/Button";
 import Header from "../components/Header";
 import Pagination from "../components/Pagination";
@@ -6,44 +8,131 @@ import ProductError from "../components/ProductError";
 import ProductFilters from "../components/ProductFilters";
 import ProductGrid from "../components/ProductGrid";
 import ProductSkeleton from "../components/ProductSkeleton";
-import { fetchProducts } from "../services/productService";
-import type { Product, SortOption } from "../types/product";
-import { getCategories } from "../utils/category";
+
+import {
+    searchProducts,
+    fetchCategories,
+    fetchBrands,
+} from "../services/ecommerceService";
+
+import type {
+    Brand,
+    Category,
+    Product,
+    ProductSearchResponse,
+} from "../types/ecommerce";
 
 const PRODUCTS_PER_PAGE = 8;
 
 function isAbortError(error: unknown): boolean {
-    return error instanceof DOMException && error.name === "AbortError";
+    return (
+        error instanceof DOMException &&
+        error.name === "AbortError"
+    );
 }
 
 function ProductList() {
+    const [searchParams, setSearchParams] =
+        useSearchParams();
+
     const [products, setProducts] = useState<Product[]>([]);
+    const [categories, setCategories] =
+        useState<Category[]>([]);
+
+    const [brands, setBrands] = useState<Brand[]>([]);
+
+    const [selectedBrandId, setSelectedBrandId] =
+        useState<number | undefined>(undefined);
+
+    const [minPrice, setMinPrice] =
+        useState<number | undefined>(undefined);
+
+    const [maxPrice, setMaxPrice] =
+        useState<number | undefined>(undefined);
+
+    const [minRating, setMinRating] =
+        useState<number | undefined>(undefined);
+
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [refreshKey, setRefreshKey] = useState(0);
+    const [error, setError] =
+        useState<string | null>(null);
 
-    const [selectedCategories, setSelectedCategories] =
-        useState<string[]>([]);
+    const [searchTerm, setSearchTerm] =
+        useState(
+            searchParams.get("search") ?? ""
+        );
 
-    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedCategoryId, setSelectedCategoryId] =
+        useState<number | undefined>(() => {
+            const value =
+                searchParams.get("categoryId");
 
-    const [sortOption, setSortOption] =
-        useState<SortOption>("");
+            return value ? Number(value) : undefined;
+        });
 
-    const [currentPage, setCurrentPage] = useState(1);
+    const [sortBy, setSortBy] = useState("");
+    const [sortOrder, setSortOrder] = useState("");
+
+    const [currentPage, setCurrentPage] =
+        useState(1);
+
+    const [totalRecords, setTotalRecords] =
+        useState(0);
+
+    const [totalPages, setTotalPages] =
+        useState(0);
 
     useEffect(() => {
         const controller = new AbortController();
 
-        fetchProducts(controller.signal)
-            .then((loadedProducts) => {
-                if (controller.signal.aborted) {
-                    return;
-                }
+        searchProducts(
+            {
+                search:
+                    searchTerm.trim() || undefined,
 
-                setProducts(loadedProducts);
-                setLoading(false);
-            })
+                categoryId:
+                    selectedCategoryId,
+
+                brandId:
+                    selectedBrandId,
+
+                minPrice,
+
+                maxPrice,
+
+                minRating,
+
+                sortBy:
+                    sortBy || undefined,
+
+                sortOrder:
+                    sortOrder || undefined,
+
+                page: currentPage,
+
+                pageSize:
+                    PRODUCTS_PER_PAGE,
+            },
+            controller.signal
+        )
+            .then(
+                (
+                    response: ProductSearchResponse
+                ) => {
+                    if (controller.signal.aborted) {
+                        return;
+                    }
+
+                    setProducts(response.products);
+                    setTotalRecords(
+                        response.totalRecords
+                    );
+                    setTotalPages(
+                        response.totalPages
+                    );
+                    setLoading(false);
+                }
+            )
             .catch((requestError: unknown) => {
                 if (
                     controller.signal.aborted ||
@@ -53,107 +142,311 @@ function ProductList() {
                 }
 
                 console.error(requestError);
-                setError("Failed to load products.");
+
+                setError(
+                    "Failed to load products."
+                );
                 setLoading(false);
             });
 
         return () => {
             controller.abort();
         };
-    }, [refreshKey]);
+    }, [
+        searchTerm,
+        selectedCategoryId,
+        selectedBrandId,
+        minPrice,
+        maxPrice,
+        minRating,
+        sortBy,
+        sortOrder,
+        currentPage,
+    ]);
+
+    useEffect(() => {
+        const controller = new AbortController();
+
+        Promise.all([
+            fetchCategories(controller.signal),
+            fetchBrands(controller.signal),
+        ])
+            .then(
+                ([
+                    loadedCategories,
+                    loadedBrands,
+                ]) => {
+                    if (controller.signal.aborted) {
+                        return;
+                    }
+
+                    setCategories(loadedCategories);
+                    setBrands(loadedBrands);
+                }
+            )
+            .catch((requestError: unknown) => {
+                if (
+                    controller.signal.aborted ||
+                    isAbortError(requestError)
+                ) {
+                    return;
+                }
+
+                console.error(
+                    "Failed to load filters:",
+                    requestError
+                );
+            });;
+
+        return () => {
+            controller.abort();
+        };
+    }, []);
+
+    function handleSearchChange(value: string) {
+        setLoading(true);
+        setError(null);
+
+        setSearchTerm(value);
+        setCurrentPage(1);
+
+        setSearchParams((currentParams) => {
+            const params = new URLSearchParams(
+                currentParams
+            );
+
+            if (value.trim()) {
+                params.set(
+                    "search",
+                    value.trim()
+                );
+            } else {
+                params.delete("search");
+            }
+
+            params.delete("page");
+
+            return params;
+        });
+    }
+
+    function handleBrandChange(
+        brandId: number | undefined
+    ) {
+        setLoading(true);
+        setError(null);
+
+        setSelectedBrandId(brandId);
+        setCurrentPage(1);
+
+        setSearchParams((params) => {
+            const nextParams =
+                new URLSearchParams(params);
+
+            if (brandId !== undefined) {
+                nextParams.set(
+                    "brandId",
+                    String(brandId)
+                );
+            } else {
+                nextParams.delete("brandId");
+            }
+
+            nextParams.delete("page");
+
+            return nextParams;
+        });
+    }
+
+    function handlePriceChange(
+        nextMinPrice: number | undefined,
+        nextMaxPrice: number | undefined
+    ) {
+        setLoading(true);
+        setError(null);
+
+        setMinPrice(nextMinPrice);
+        setMaxPrice(nextMaxPrice);
+        setCurrentPage(1);
+
+        setSearchParams((params) => {
+            const nextParams =
+                new URLSearchParams(params);
+
+            if (nextMinPrice !== undefined) {
+                nextParams.set(
+                    "minPrice",
+                    String(nextMinPrice)
+                );
+            } else {
+                nextParams.delete("minPrice");
+            }
+
+            if (nextMaxPrice !== undefined) {
+                nextParams.set(
+                    "maxPrice",
+                    String(nextMaxPrice)
+                );
+            } else {
+                nextParams.delete("maxPrice");
+            }
+
+            nextParams.delete("page");
+
+            return nextParams;
+        });
+    }
+
+    function handleRatingChange(
+        rating: number | undefined
+    ) {
+        setLoading(true);
+        setError(null);
+
+        setMinRating(rating);
+        setCurrentPage(1);
+
+        setSearchParams((params) => {
+            const nextParams =
+                new URLSearchParams(params);
+
+            if (rating !== undefined) {
+                nextParams.set(
+                    "minRating",
+                    String(rating)
+                );
+            } else {
+                nextParams.delete("minRating");
+            }
+
+            nextParams.delete("page");
+
+            return nextParams;
+        });
+    }
+
+    function handleCategoryChange(
+        categoryId: number
+    ) {
+        setLoading(true);
+        setError(null);
+
+        setSelectedCategoryId((current) => {
+            const next =
+                current === categoryId
+                    ? undefined
+                    : categoryId;
+
+            setSearchParams((params) => {
+                const nextParams =
+                    new URLSearchParams(params);
+
+                if (next !== undefined) {
+                    nextParams.set(
+                        "categoryId",
+                        String(next)
+                    );
+                } else {
+                    nextParams.delete(
+                        "categoryId"
+                    );
+                }
+
+                nextParams.delete("page");
+
+                return nextParams;
+            });
+
+            return next;
+        });
+
+        setCurrentPage(1);
+    }
+
+    function handleSortChange(
+        value: string
+    ) {
+        setLoading(true);
+        setError(null);
+
+        let nextSortBy = "";
+        let nextSortOrder = "";
+
+        if (value) {
+            const [field, order] =
+                value.split("-");
+
+            nextSortBy = field;
+            nextSortOrder = order;
+        }
+
+        setSortBy(nextSortBy);
+        setSortOrder(nextSortOrder);
+        setCurrentPage(1);
+
+        setSearchParams((params) => {
+            const nextParams =
+                new URLSearchParams(params);
+
+            if (nextSortBy) {
+                nextParams.set(
+                    "sortBy",
+                    nextSortBy
+                );
+
+                nextParams.set(
+                    "sortOrder",
+                    nextSortOrder
+                );
+            } else {
+                nextParams.delete("sortBy");
+                nextParams.delete("sortOrder");
+            }
+
+            nextParams.delete("page");
+
+            return nextParams;
+        });
+    }
 
     function refreshProducts() {
         setLoading(true);
         setError(null);
 
         setSearchTerm("");
-        setSelectedCategories([]);
-        setSortOption("");
+        setSelectedCategoryId(undefined);
+        setSelectedBrandId(undefined);
+
+        setMinPrice(undefined);
+        setMaxPrice(undefined);
+        setMinRating(undefined);
+
+        setSortBy("");
+        setSortOrder("");
+
         setCurrentPage(1);
 
-        setRefreshKey((current) => current + 1);
+        setSearchParams({});
     }
 
-    function handleSearchChange(value: string) {
-        setSearchTerm(value);
-        setCurrentPage(1);
-    }
+    const selectedCategoryIds =
+        selectedCategoryId === undefined
+            ? []
+            : [selectedCategoryId];
 
-    function toggleCategory(category: string) {
-        setSelectedCategories((currentCategories) =>
-            currentCategories.includes(category)
-                ? currentCategories.filter(
-                    (currentCategory) =>
-                        currentCategory !== category
+    const selectedCategoryNames =
+        categories
+            .filter((category) =>
+                selectedCategoryIds.includes(
+                    category.categoryId
                 )
-                : [...currentCategories, category]
-        );
+            )
+            .map((category) => category.name);
 
-        setCurrentPage(1);
-    }
-
-    function handleSortChange(value: SortOption) {
-        setSortOption(value);
-        setCurrentPage(1);
-    }
-
-    // 1. Search
-    const searchedProducts = products.filter((product) =>
-        product.name
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase())
-    );
-
-    // 2. Category
-    const filteredProducts =
-        selectedCategories.length === 0
-            ? searchedProducts
-            : searchedProducts.filter((product) =>
-                selectedCategories.includes(product.category)
-            );
-
-    // 3. Sort
-    const sortedProducts = [...filteredProducts].sort((a, b) => {
-        switch (sortOption) {
-            case "price-asc":
-                return a.price - b.price;
-
-            case "price-desc":
-                return b.price - a.price;
-
-            case "name-asc":
-                return a.name.localeCompare(b.name);
-
-            case "name-desc":
-                return b.name.localeCompare(a.name);
-
-            case "rating-asc":
-                return a.rating - b.rating;
-
-            case "rating-desc":
-                return b.rating - a.rating;
-
-            default:
-                return 0;
-        }
-    });
-
-    // 4. Pagination
-    const totalPages = Math.ceil(
-        sortedProducts.length / PRODUCTS_PER_PAGE
-    );
-
-    const startIndex =
-        (currentPage - 1) * PRODUCTS_PER_PAGE;
-
-    const paginatedProducts = sortedProducts.slice(
-        startIndex,
-        startIndex + PRODUCTS_PER_PAGE
-    );
-
-    const categories = getCategories(
-        products.map((product) => product.category)
-    );
+    const sortValue =
+        sortBy && sortOrder
+            ? `${sortBy}-${sortOrder}`
+            : "";
 
     return (
         <>
@@ -165,12 +458,12 @@ function ProductList() {
 
             <main className="min-h-screen bg-gray-100">
                 <div className="mx-auto max-w-6xl px-6 py-8">
-
-                    {/* Page Header */}
+                    {/* Header */}
                     <div className="mb-5 flex items-end justify-between">
                         <div>
                             <p className="mb-1 text-xs text-gray-500">
-                                Home &gt; Products &gt; Search Results
+                                Home &gt; Products &gt; Search
+                                Results
                             </p>
 
                             <h1 className="text-2xl font-bold text-gray-900">
@@ -186,47 +479,100 @@ function ProductList() {
                         </Button>
                     </div>
 
-                    {/* Result Count */}
+                    {/* Product count */}
                     {!loading && !error && (
                         <p className="mb-4 text-center text-xs text-gray-500">
-                            Showing {sortedProducts.length} results
+                            Showing{" "}
+                            {products.length} of{" "}
+                            {totalRecords} products
                             {searchTerm.trim()
                                 ? ` for "${searchTerm}"`
                                 : ""}
                         </p>
                     )}
 
-                    {/* Main Content */}
                     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[190px_1fr] lg:gap-6">
-
-                        {/* Sidebar */}
                         <ProductFilters
-                            categories={categories}
-                            selectedCategories={selectedCategories}
-                            onToggleCategory={toggleCategory}
-                            sortOption={sortOption}
+                            categories={categories.map(
+                                (category) => category.name
+                            )}
+                            selectedCategories={
+                                selectedCategoryNames
+                            }
+                            onToggleCategory={
+                                (categoryName) => {
+                                    const category =
+                                        categories.find(
+                                            (item) =>
+                                                item.name ===
+                                                categoryName
+                                        );
+
+                                    if (category) {
+                                        handleCategoryChange(
+                                            category.categoryId
+                                        );
+                                    }
+                                }
+                            }
+
+                            brands={brands}
+                            selectedBrandId={selectedBrandId}
+                            onBrandChange={handleBrandChange}
+
+                            minPrice={minPrice}
+                            maxPrice={maxPrice}
+                            onPriceChange={handlePriceChange}
+
+                            minRating={minRating}
+                            onRatingChange={handleRatingChange}
+
+                            sortOption={sortValue}
                             onSortChange={handleSortChange}
                         />
 
-                        {/* Products */}
                         <section>
                             {loading ? (
                                 <ProductSkeleton />
                             ) : error ? (
                                 <ProductError
                                     message={error}
-                                    onRetry={refreshProducts}
+                                    onRetry={
+                                        refreshProducts
+                                    }
                                 />
-                            ) : sortedProducts.length > 0 ? (
+                            ) : products.length > 0 ? (
                                 <>
                                     <ProductGrid
-                                        products={paginatedProducts}
+                                        products={
+                                            products
+                                        }
                                     />
 
                                     <Pagination
-                                        currentPage={currentPage}
-                                        totalPages={totalPages}
-                                        onPageChange={setCurrentPage}
+                                        currentPage={
+                                            currentPage
+                                        }
+                                        totalPages={
+                                            totalPages
+                                        }
+                                        onPageChange={(page) => {
+                                            setLoading(true);
+                                            setError(null);
+                                            setCurrentPage(page);
+
+                                            setSearchParams((params) => {
+                                                const nextParams =
+                                                    new URLSearchParams(params);
+
+                                                nextParams.set(
+                                                    "page",
+                                                    String(page)
+                                                );
+
+                                                return nextParams;
+                                            });
+                                        }}
                                     />
                                 </>
                             ) : (
@@ -236,7 +582,8 @@ function ProductList() {
                                     </p>
 
                                     <p className="text-sm text-gray-500">
-                                        Try changing your search or filters.
+                                        Try changing your
+                                        search or filters.
                                     </p>
                                 </div>
                             )}
