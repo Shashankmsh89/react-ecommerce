@@ -97,12 +97,13 @@ function Header({
                         <User size={13} />
                     </button>
 
-                    <button
-                        type="button"
+                    <Link
+                        to="/cart"
+                        aria-label="Shopping cart"
                         className="hover:text-orange-500"
                     >
                         <ShoppingCart size={13} />
-                    </button>
+                    </Link>
                 </div>
             </div>
         </header>

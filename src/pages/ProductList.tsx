@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 
 import Button from "../components/Button";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 import Pagination from "../components/Pagination";
 import ProductError from "../components/ProductError";
 import ProductFilters from "../components/ProductFilters";
@@ -22,6 +23,8 @@ import type {
     ProductSearchResponse,
 } from "../types/ecommerce";
 
+import useDebounce from "../hooks/useDebounce";
+
 const PRODUCTS_PER_PAGE = 8;
 
 function isAbortError(error: unknown): boolean {
@@ -31,7 +34,14 @@ function isAbortError(error: unknown): boolean {
     );
 }
 
-function ProductList() {
+interface ProductListProps {
+    onAddToCart: (
+        product: Product,
+        quantity: number
+    ) => void;
+}
+
+function ProductList({ onAddToCart }: ProductListProps) {
     const [searchParams, setSearchParams] =
         useSearchParams();
 
@@ -61,6 +71,7 @@ function ProductList() {
         useState(
             searchParams.get("search") ?? ""
         );
+    const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
     const [selectedCategoryId, setSelectedCategoryId] =
         useState<number | undefined>(() => {
@@ -87,8 +98,7 @@ function ProductList() {
 
         searchProducts(
             {
-                search:
-                    searchTerm.trim() || undefined,
+                search: debouncedSearchTerm.trim() || undefined,
 
                 categoryId:
                     selectedCategoryId,
@@ -153,7 +163,7 @@ function ProductList() {
             controller.abort();
         };
     }, [
-        searchTerm,
+        debouncedSearchTerm,
         selectedCategoryId,
         selectedBrandId,
         minPrice,
@@ -544,9 +554,8 @@ function ProductList() {
                             ) : products.length > 0 ? (
                                 <>
                                     <ProductGrid
-                                        products={
-                                            products
-                                        }
+                                        products={products}
+                                        onAddToCart={onAddToCart}
                                     />
 
                                     <Pagination
@@ -590,7 +599,9 @@ function ProductList() {
                         </section>
                     </div>
                 </div>
+                <Footer />
             </main>
+
         </>
     );
 }

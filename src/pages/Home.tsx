@@ -11,34 +11,30 @@ import Footer from "../components/Footer";
 import Header from "../components/Header";
 import ProductCard from "../components/ProductCard";
 
-import {
-    fetchCategories,
-    fetchProducts,
-} from "../services/ecommerceService";
-
 import type {
     Category,
     Product,
 } from "../types/ecommerce";
 
+import useFetch from "../hooks/useFetch";
+
 function Home() {
     const navigate = useNavigate();
 
-    const [products, setProducts] = useState<Product[]>([]);
-    const [categories, setCategories] =
-        useState<Category[]>([]);
+    const {
+        data: productsData,
+        loading: loadingProducts,
+        error: productsError,
+    } = useFetch<Product[]>("/api/v1/Products");
 
-    const [loadingProducts, setLoadingProducts] =
-        useState(true);
+    const {
+        data: categoriesData,
+        loading: loadingCategories,
+        error: categoriesError,
+    } = useFetch<Category[]>("/api/Categories");
 
-    const [loadingCategories, setLoadingCategories] =
-        useState(true);
-
-    const [productsError, setProductsError] =
-        useState<string | null>(null);
-
-    const [categoriesError, setCategoriesError] =
-        useState<string | null>(null);
+    const products = productsData ?? [];
+    const categories = categoriesData ?? [];
 
     const [searchTerm, setSearchTerm] =
         useState("");
@@ -48,71 +44,6 @@ function Home() {
 
     const [visibleCount, setVisibleCount] =
         useState(4);
-
-    useEffect(() => {
-        const controller =
-            new AbortController();
-
-        fetchProducts(controller.signal)
-            .then((loadedProducts) => {
-                if (controller.signal.aborted) {
-                    return;
-                }
-
-                setProducts(loadedProducts);
-                setLoadingProducts(false);
-            })
-            .catch((requestError: unknown) => {
-                if (
-                    controller.signal.aborted ||
-                    (requestError instanceof DOMException &&
-                        requestError.name ===
-                        "AbortError")
-                ) {
-                    return;
-                }
-
-                console.error(requestError);
-
-                setProductsError(
-                    "Failed to load featured products."
-                );
-
-                setLoadingProducts(false);
-            });
-
-        fetchCategories(controller.signal)
-            .then((loadedCategories) => {
-                if (controller.signal.aborted) {
-                    return;
-                }
-
-                setCategories(loadedCategories);
-                setLoadingCategories(false);
-            })
-            .catch((requestError: unknown) => {
-                if (
-                    controller.signal.aborted ||
-                    (requestError instanceof DOMException &&
-                        requestError.name ===
-                        "AbortError")
-                ) {
-                    return;
-                }
-
-                console.error(requestError);
-
-                setCategoriesError(
-                    "Failed to load categories."
-                );
-
-                setLoadingCategories(false);
-            });
-
-        return () => {
-            controller.abort();
-        };
-    }, []);
 
     useEffect(() => {
         function updateVisibleCount() {

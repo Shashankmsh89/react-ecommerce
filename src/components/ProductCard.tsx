@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Button from "./Button";
+import type { Product } from "../types/ecommerce";
 
 interface ProductCardProps {
     name: string;
@@ -11,6 +12,12 @@ interface ProductCardProps {
     unitPrice?: number;
     discountPercentage?: number;
     variant?: "featured" | "listing";
+    product?: Product;
+
+    onAddToCart?: (
+        product: Product,
+        quantity: number
+    ) => void;
 }
 
 const FALLBACK_PRODUCT_IMAGE =
@@ -26,6 +33,8 @@ function ProductCard({
     unitPrice,
     discountPercentage,
     variant = "featured",
+    product,
+    onAddToCart,
 }: ProductCardProps) {
     const [quantity, setQuantity] = useState(1);
 
@@ -52,9 +61,11 @@ function ProductCard({
     }
 
     function handleAddToCart() {
-        console.log(
-            `Added to cart: ${name} | Quantity: ${quantity} | Total: ₹${totalPrice ?? 0}`
-        );
+        if (!product || !onAddToCart) {
+            return;
+        }
+
+        onAddToCart(product, quantity);
     }
 
     return (
