@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
-import Footer from "../components/Footer";
-import Header from "../components/Header";
 import Breadcrumb from "../components/Breadcrumb";
 import Button from "../components/Button";
 
@@ -165,7 +163,7 @@ function CheckoutHookForm() {
         console.log("Order placed:", data);
 
         setSuccessMessage(
-            "Order placed successfully!"
+            "Demo checkout submitted. No order has been saved."
         );
 
         reset();
@@ -176,8 +174,6 @@ function CheckoutHookForm() {
 
     return (
         <>
-            <Header />
-
             <main className="mx-auto max-w-6xl px-4 py-8">
 
                 <Breadcrumb
@@ -789,8 +785,6 @@ function CheckoutHookForm() {
                 </div>
 
             </main>
-
-            <Footer />
         </>
     );
 }

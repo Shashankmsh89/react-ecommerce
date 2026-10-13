@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-import Footer from "../components/Footer";
 
-import Header from "../components/Header";
 import Breadcrumb from "../components/Breadcrumb";
 import Button from "../components/Button";
 
@@ -230,7 +228,7 @@ function CheckoutControlled() {
         console.log("Order placed:", form);
 
         setSuccessMessage(
-            "Order placed successfully!"
+            "Demo checkout submitted. No order has been saved."
         );
 
         setForm(initialCheckoutForm);
@@ -244,8 +242,6 @@ function CheckoutControlled() {
 
     return (
         <>
-            <Header />
-
             <main className="mx-auto max-w-6xl px-4 py-8">
 
                 <Breadcrumb
@@ -747,8 +743,6 @@ function CheckoutControlled() {
                     </aside>
                 </div>
             </main>
-
-            <Footer />
         </>
     );
 }
