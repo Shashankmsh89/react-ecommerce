@@ -1,49 +1,20 @@
 
 import { Link } from "react-router-dom";
-import type { CartItem as CartItemType } from "../types/cart";
+import Breadcrumb from "./Breadcrumb";
 import CartItem from "./CartItem";
+import useCartContext from "../hooks/useCartContext";
 
-interface CartProps {
-    items: CartItemType[];
-    onQuantityChange: (
-        productId: number,
-        quantity: number
-    ) => void;
-    onRemove: (productId: number) => void;
-}
-
-function Cart({
-    items,
-    onQuantityChange,
-    onRemove,
-}: CartProps) {
-    const subtotal = items.reduce(
-        (total, item) =>
-            total + item.price * item.quantity,
-        0
-    );
-
-    const totalItems = items.reduce(
-        (total, item) => total + item.quantity,
-        0
-    );
+function Cart() {
+    const { items, updateQuantity, removeFromCart, subtotal, totalItems } =
+        useCartContext();
+    const shipping = 0;
+    const tax = subtotal * 0.08;
+    const total = subtotal + shipping + tax;
 
     return (
         <main className="min-h-screen bg-gray-100 px-4 py-8 sm:px-6">
             <div className="mx-auto max-w-6xl">
-                {/* Breadcrumb */}
-                <nav className="mb-4 text-xs text-gray-500">
-                    <Link
-                        to="/"
-                        className="hover:text-orange-500"
-                    >
-                        Home
-                    </Link>
-
-                    <span className="mx-2">&gt;</span>
-
-                    <span>Shopping Cart</span>
-                </nav>
+                <Breadcrumb className="mb-4 text-xs text-gray-500" />
 
                 <h1 className="mb-6 text-2xl font-bold text-gray-900">
                     Shopping Cart ({totalItems}{" "}
@@ -95,9 +66,9 @@ function Cart({
                                     key={item.productId}
                                     item={item}
                                     onQuantityChange={
-                                        onQuantityChange
+                                        updateQuantity
                                     }
-                                    onRemove={onRemove}
+                                    onRemove={removeFromCart}
                                 />
                             ))}
                         </section>
@@ -125,25 +96,34 @@ function Cart({
                                         Shipping
                                     </span>
 
-                                    <span className="text-gray-800">
-                                        Calculated at checkout
+                                    <span className="font-medium text-gray-800">
+                                        ₹{shipping.toFixed(2)}
+                                    </span>
+                                </div>
+
+                                <div className="flex justify-between gap-3">
+                                    <span className="text-gray-500">
+                                        Tax (8%)
+                                    </span>
+
+                                    <span className="font-medium text-gray-800">
+                                        ₹{tax.toFixed(2)}
                                     </span>
                                 </div>
                             </div>
 
                             <div className="mt-5 flex items-center justify-between border-t-2 border-orange-500 pt-4">
-                                <span className="font-bold text-gray-900">
-                                    Subtotal
+                                <span className="text-lg font-bold text-gray-900">
+                                    Total
                                 </span>
 
                                 <span className="text-xl font-bold text-orange-600">
-                                    ₹{subtotal.toFixed(2)}
+                                    ₹{total.toFixed(2)}
                                 </span>
                             </div>
 
                             <p className="mt-2 text-xs text-gray-400">
-                                Taxes and shipping are not
-                                included.
+                                Includes 8% tax and free shipping.
                             </p>
 
                             <Link

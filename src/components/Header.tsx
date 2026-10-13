@@ -5,19 +5,21 @@ import {
     User,
     ShoppingCart,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import ProductSearch from "./ProductSearch";
 
 interface HeaderProps {
     showSearch?: boolean;
     searchTerm?: string;
     onSearchChange?: (value: string) => void;
+    cartCount?: number;
 }
 
 function Header({
     showSearch = false,
     searchTerm = "",
     onSearchChange,
+    cartCount = 0,
 }: HeaderProps) {
     return (
         <header className="sticky top-0 z-50 border-b border-gray-200 bg-white">
@@ -52,19 +54,30 @@ function Header({
 
                 {/* Navigation */}
                 <nav className="hidden items-center gap-5 md:flex">
-                    <Link
+                    <NavLink
                         to="/"
-                        className="text-[11px] text-gray-600 hover:text-orange-500"
+                        end
+                        className={({ isActive }) =>
+                            `text-[11px] ${isActive
+                                ? "font-semibold text-orange-500"
+                                : "text-gray-600 hover:text-orange-500"
+                            }`
+                        }
                     >
                         Home
-                    </Link>
+                    </NavLink>
 
-                    <Link
+                    <NavLink
                         to="/products"
-                        className="text-[11px] text-gray-600 hover:text-orange-500"
+                        className={({ isActive }) =>
+                            `text-[11px] ${isActive
+                                ? "font-semibold text-orange-500"
+                                : "text-gray-600 hover:text-orange-500"
+                            }`
+                        }
                     >
                         Products
-                    </Link>
+                    </NavLink>
 
                     <Link
                         to="/"
@@ -99,10 +112,16 @@ function Header({
 
                     <Link
                         to="/cart"
-                        aria-label="Shopping cart"
-                        className="hover:text-orange-500"
+                        aria-label={`Shopping cart, ${cartCount} items`}
+                        className="relative hover:text-orange-500"
                     >
                         <ShoppingCart size={13} />
+
+                        {cartCount > 0 && (
+                            <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-orange-500 px-1 text-[9px] font-bold text-white">
+                                {cartCount > 99 ? "99+" : cartCount}
+                            </span>
+                        )}
                     </Link>
                 </div>
             </div>

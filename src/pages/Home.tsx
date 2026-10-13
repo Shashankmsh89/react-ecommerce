@@ -7,8 +7,6 @@ import {
 } from "lucide-react";
 
 import Button from "../components/Button";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
 import ProductCard from "../components/ProductCard";
 
 import type {
@@ -119,7 +117,7 @@ function Home() {
 
     return (
         <div className="min-h-screen bg-white">
-            <Header />
+
 
             <main>
                 {/* Hero */}
@@ -525,8 +523,6 @@ function Home() {
                     </div>
                 </section>
             </main>
-
-            <Footer />
         </div>
     );
 }

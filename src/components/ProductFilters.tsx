@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import ProductSearch from "./ProductSearch";
 import ProductSort from "./ProductSort";
 import { formatCategory } from "../utils/category";
 
@@ -9,6 +10,9 @@ interface FilterBrand {
 }
 
 interface ProductFiltersProps {
+    searchTerm: string;
+    onSearchChange: (value: string) => void;
+
     categories: readonly string[];
     selectedCategories: readonly string[];
     onToggleCategory: (category: string) => void;
@@ -36,6 +40,8 @@ interface ProductFiltersProps {
 }
 
 function ProductFilters({
+    searchTerm,
+    onSearchChange,
     categories,
     selectedCategories,
     onToggleCategory,
@@ -105,6 +111,13 @@ function ProductFilters({
 
     return (
         <aside className="h-fit rounded-sm border border-gray-200 bg-white shadow-sm lg:sticky lg:top-20">
+            <div className="border-b border-gray-200 p-4">
+                <ProductSearch
+                    value={searchTerm}
+                    onChange={onSearchChange}
+                />
+            </div>
+
             {/* Sort */}
             <div className="px-4 pt-4 pb-2">
                 <ProductSort

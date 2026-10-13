@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-
 import Button from "../components/Button";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+import Breadcrumb from "../components/Breadcrumb";
 import Pagination from "../components/Pagination";
 import ProductError from "../components/ProductError";
 import ProductFilters from "../components/ProductFilters";
 import ProductGrid from "../components/ProductGrid";
 import ProductSkeleton from "../components/ProductSkeleton";
+import useCartContext from "../hooks/useCartContext";
 
 import {
     searchProducts,
@@ -34,14 +33,8 @@ function isAbortError(error: unknown): boolean {
     );
 }
 
-interface ProductListProps {
-    onAddToCart: (
-        product: Product,
-        quantity: number
-    ) => void;
-}
-
-function ProductList({ onAddToCart }: ProductListProps) {
+function ProductList() {
+    const { addToCart } = useCartContext();
     const [searchParams, setSearchParams] =
         useSearchParams();
 
@@ -66,11 +59,12 @@ function ProductList({ onAddToCart }: ProductListProps) {
     const [loading, setLoading] = useState(true);
     const [error, setError] =
         useState<string | null>(null);
+    const [failedSearchTerm, setFailedSearchTerm] =
+        useState<string | null>(null);
+    const [loadedSearchTerm, setLoadedSearchTerm] =
+        useState<string | null>(null);
 
-    const [searchTerm, setSearchTerm] =
-        useState(
-            searchParams.get("search") ?? ""
-        );
+    const searchTerm = searchParams.get("search") ?? "";
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
     const [selectedCategoryId, setSelectedCategoryId] =
@@ -84,8 +78,8 @@ function ProductList({ onAddToCart }: ProductListProps) {
     const [sortBy, setSortBy] = useState("");
     const [sortOrder, setSortOrder] = useState("");
 
-    const [currentPage, setCurrentPage] =
-        useState(1);
+    const currentPage =
+        Number(searchParams.get("page")) || 1;
 
     const [totalRecords, setTotalRecords] =
         useState(0);
@@ -134,6 +128,8 @@ function ProductList({ onAddToCart }: ProductListProps) {
                     }
 
                     setProducts(response.products);
+                    setFailedSearchTerm(null);
+                    setLoadedSearchTerm(debouncedSearchTerm);
                     setTotalRecords(
                         response.totalRecords
                     );
@@ -153,6 +149,7 @@ function ProductList({ onAddToCart }: ProductListProps) {
 
                 console.error(requestError);
 
+                setFailedSearchTerm(debouncedSearchTerm);
                 setError(
                     "Failed to load products."
                 );
@@ -217,9 +214,6 @@ function ProductList({ onAddToCart }: ProductListProps) {
         setLoading(true);
         setError(null);
 
-        setSearchTerm(value);
-        setCurrentPage(1);
-
         setSearchParams((currentParams) => {
             const params = new URLSearchParams(
                 currentParams
@@ -228,7 +222,7 @@ function ProductList({ onAddToCart }: ProductListProps) {
             if (value.trim()) {
                 params.set(
                     "search",
-                    value.trim()
+                    value
                 );
             } else {
                 params.delete("search");
@@ -247,7 +241,6 @@ function ProductList({ onAddToCart }: ProductListProps) {
         setError(null);
 
         setSelectedBrandId(brandId);
-        setCurrentPage(1);
 
         setSearchParams((params) => {
             const nextParams =
@@ -277,7 +270,6 @@ function ProductList({ onAddToCart }: ProductListProps) {
 
         setMinPrice(nextMinPrice);
         setMaxPrice(nextMaxPrice);
-        setCurrentPage(1);
 
         setSearchParams((params) => {
             const nextParams =
@@ -314,7 +306,6 @@ function ProductList({ onAddToCart }: ProductListProps) {
         setError(null);
 
         setMinRating(rating);
-        setCurrentPage(1);
 
         setSearchParams((params) => {
             const nextParams =
@@ -370,7 +361,6 @@ function ProductList({ onAddToCart }: ProductListProps) {
             return next;
         });
 
-        setCurrentPage(1);
     }
 
     function handleSortChange(
@@ -392,7 +382,6 @@ function ProductList({ onAddToCart }: ProductListProps) {
 
         setSortBy(nextSortBy);
         setSortOrder(nextSortOrder);
-        setCurrentPage(1);
 
         setSearchParams((params) => {
             const nextParams =
@@ -423,7 +412,6 @@ function ProductList({ onAddToCart }: ProductListProps) {
         setLoading(true);
         setError(null);
 
-        setSearchTerm("");
         setSelectedCategoryId(undefined);
         setSelectedBrandId(undefined);
 
@@ -433,8 +421,6 @@ function ProductList({ onAddToCart }: ProductListProps) {
 
         setSortBy("");
         setSortOrder("");
-
-        setCurrentPage(1);
 
         setSearchParams({});
     }
@@ -457,24 +443,17 @@ function ProductList({ onAddToCart }: ProductListProps) {
         sortBy && sortOrder
             ? `${sortBy}-${sortOrder}`
             : "";
+    const currentError =
+        failedSearchTerm === searchTerm ? error : null;
 
     return (
         <>
-            <Header
-                showSearch
-                searchTerm={searchTerm}
-                onSearchChange={handleSearchChange}
-            />
-
             <main className="min-h-screen bg-gray-100">
                 <div className="mx-auto max-w-6xl px-6 py-8">
                     {/* Header */}
                     <div className="mb-5 flex items-end justify-between">
                         <div>
-                            <p className="mb-1 text-xs text-gray-500">
-                                Home &gt; Products &gt; Search
-                                Results
-                            </p>
+                            <Breadcrumb className="mb-1 text-xs text-gray-500" />
 
                             <h1 className="text-2xl font-bold text-gray-900">
                                 Product Listing
@@ -490,7 +469,9 @@ function ProductList({ onAddToCart }: ProductListProps) {
                     </div>
 
                     {/* Product count */}
-                    {!loading && !error && (
+                    {!loading &&
+                        !currentError &&
+                        loadedSearchTerm === searchTerm && (
                         <p className="mb-4 text-center text-xs text-gray-500">
                             Showing{" "}
                             {products.length} of{" "}
@@ -503,6 +484,8 @@ function ProductList({ onAddToCart }: ProductListProps) {
 
                     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[190px_1fr] lg:gap-6">
                         <ProductFilters
+                            searchTerm={searchTerm}
+                            onSearchChange={handleSearchChange}
                             categories={categories.map(
                                 (category) => category.name
                             )}
@@ -542,11 +525,13 @@ function ProductList({ onAddToCart }: ProductListProps) {
                         />
 
                         <section>
-                            {loading ? (
+                            {loading ||
+                            (!currentError &&
+                                loadedSearchTerm !== searchTerm) ? (
                                 <ProductSkeleton />
-                            ) : error ? (
+                            ) : currentError ? (
                                 <ProductError
-                                    message={error}
+                                    message={currentError}
                                     onRetry={
                                         refreshProducts
                                     }
@@ -555,7 +540,7 @@ function ProductList({ onAddToCart }: ProductListProps) {
                                 <>
                                     <ProductGrid
                                         products={products}
-                                        onAddToCart={onAddToCart}
+                                        onAddToCart={addToCart}
                                     />
 
                                     <Pagination
@@ -568,7 +553,6 @@ function ProductList({ onAddToCart }: ProductListProps) {
                                         onPageChange={(page) => {
                                             setLoading(true);
                                             setError(null);
-                                            setCurrentPage(page);
 
                                             setSearchParams((params) => {
                                                 const nextParams =
@@ -599,7 +583,6 @@ function ProductList({ onAddToCart }: ProductListProps) {
                         </section>
                     </div>
                 </div>
-                <Footer />
             </main>
 
         </>
